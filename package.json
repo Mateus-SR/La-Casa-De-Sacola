@@ -1,0 +1,27 @@
+{
+  "name": "la-casa-de-sacola",
+  "version": "1.0.0",
+  "description": "[FatecDSM-2026/1] Repositório para desenvolvimento da aplicação de e-commerce para facilitar vendas e registros de loja já existente",
+  "homepage": "https://github.com/Mateus-SR/La-Casa-De-Sacola#readme",
+  "bugs": {
+    "url": "https://github.com/Mateus-SR/La-Casa-De-Sacola/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mateus-SR/La-Casa-De-Sacola.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "test",
+    "tailwind": "npx tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}
