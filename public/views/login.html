@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+
+  <style>
+    .login-bg {
+      background-position: center 58%;
+    }
+
+    @media (min-width: 768px) {
+      .login-bg {
+        background-position: center 78%;
+      }
+    }
+  </style>
+</head>
+
+<body class="login-bg h-screen flex items-center justify-center bg-cover"
+  style="background-image: url('../img/img_login.png');">
+
+  <!-- Overlay escuro -->
+  <div class="absolute inset-0 bg-black/70"></div>
+
+  <!-- CARD -->
+  <div class="absolute right-0 top-0 h-screen w-1/2 flex items-center justify-center bg-gradient-to-tl from-rose-900/60 via-red-900/30 to-white/10 backdrop-blur-xl rounded-none">
+    
+    <div class="p-10 w-full max-w-xl mx-auto">
+      <!-- LOGO -->
+      <h1 class="text-white text-5xl text-center mb-12 tracking-wide font-bold whitespace-nowrap"
+          style="font-family: 'Anton', sans-serif;">
+        LA CASA <span class="bg-red-600 px-2 py-1">DE</span> SACOLA
+      </h1>
+
+      <!-- FORM -->
+      <form class="flex flex-col w-full">
+
+        <!-- EMAIL -->
+        <input type="email" placeholder="Email"
+          class="w-full mb-6 p-4 text-lg rounded bg-white/80 outline-none focus:ring-2 focus:ring-red-500 transition">
+
+        <!-- SENHA -->
+        <input type="password" placeholder="Senha"
+          class="w-full mb-4 p-4 text-lg rounded bg-white/80 outline-none focus:ring-2 focus:ring-red-500 transition">
+
+        <!-- ESQUECI SENHA -->
+        <a href="#" class="text-base text-gray-300 mb-8 hover:text-red-400 text-right">
+          Esqueci minha senha
+        </a>
+
+        <!-- BOTÃO -->
+        <button
+          class="w-full bg-red-600 hover:bg-red-700 hover:scale-105 text-white p-4 text-lg rounded transition duration-300 shadow-lg">
+          Entrar
+        </button>
+
+      </form>
+
+      <!-- CADASTRO -->
+      <p class="text-gray-300 text-base text-center mt-8">
+        Não tem conta?
+        <a href="#" class="text-red-500 hover:underline">
+          Criar conta
+        </a>
+      </p>
+    </div>
+
+  </div>
+
+</body>
+</html>
