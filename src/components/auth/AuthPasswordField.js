@@ -3,7 +3,8 @@
 import { useState } from "react";
 import styles from "./auth.module.css";
 
-export default function AuthPasswordField({ placeholder, revealClass = styles.d2 }) {
+// Adicionadas as propriedades 'value' e 'onChange'
+export default function AuthPasswordField({ placeholder, value, onChange, revealClass = styles.d2 }) {
   const [isVisible, setIsVisible] = useState(false);
 
   const toggleVisibility = () => {
@@ -16,6 +17,8 @@ export default function AuthPasswordField({ placeholder, revealClass = styles.d2
       <input
         type={isVisible ? "text" : "password"}
         placeholder={placeholder}
+        value={value} // Conecta ao estado do formulário
+        onChange={onChange} // Permite capturar a digitação
         className={`${styles.formControl} rounded-xl p-4 outline-none`}
       />
       <button
