@@ -22,7 +22,7 @@ export default function Cadastro() {
         <AuthCard>
           <h1 className={`${styles.reveal} ${styles.d1} ${styles.title} font-extrabold`}>Cadastro</h1>
           <p className={`${styles.reveal} ${styles.d2} ${styles.titleSub} mt-2`}>
-            Crie sua conta e comece a vender suas sacolas
+            Crie sua conta e personalize sua sacola
           </p>
 
           <form className={`${styles.formBlock} mt-8 flex flex-col`}>
