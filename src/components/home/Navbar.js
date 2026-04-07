@@ -48,7 +48,6 @@ export default function Navbar() {
             </Link>
           </nav>
 
-          {/* CTA buttons */}
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/login"

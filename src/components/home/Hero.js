@@ -4,11 +4,9 @@ import Link from "next/link";
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[#292622] via-[#1a3828] to-[#5ab58f] min-h-[92vh] flex items-center">
-      {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-[#61c39a] opacity-[0.07] blur-3xl" />
         <div className="absolute bottom-0 -left-32 w-[500px] h-[500px] rounded-full bg-[#3ca779] opacity-[0.06] blur-3xl" />
-        {/* Grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -20,7 +18,6 @@ export default function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left content */}
           <div className="text-white">
 
             <h1
@@ -61,14 +58,12 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right: Bag showcase */}
           <div className="relative flex items-center justify-center">
             
           </div>
         </div>
       </div>
 
-      {/* Bottom wave */}
       <div className="absolute bottom-0 left-0 right-0">
         <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-12">
           <path d="M0 60 C360 20 1080 20 1440 60 L1440 60 L0 60 Z" fill="white"/>

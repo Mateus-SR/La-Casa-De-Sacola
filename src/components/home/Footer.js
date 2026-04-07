@@ -3,10 +3,8 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer id="contato" className="bg-[#292622] text-white">
-      {/* Main footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#292622] to-[#8f0000] flex items-center justify-center shadow-md">
@@ -59,7 +57,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Products */}
           <div>
             <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Sacolas</h4>
             <ul className="space-y-2.5">
@@ -73,7 +70,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
           <div>
             <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Empresa</h4>
             <ul className="space-y-2.5">
@@ -91,7 +87,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Contato</h4>
             <ul className="space-y-3">
@@ -116,7 +111,6 @@ export default function Footer() {
               </li>
             </ul>
 
-            {/* Newsletter */}
             <div className="mt-6">
               <p className="text-[#cbc0b7] text-xs mb-2">Receba novidades e promoções:</p>
               <div className="flex gap-2">
@@ -136,7 +130,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-[#cbc0b7] text-xs">

@@ -72,7 +72,6 @@ export default function BagCategories() {
   return (
     <section id="categorias" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section header */}
         <div className="text-center mb-12">
           <span className="inline-block bg-[#f0faf5] text-[#3ca779] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             Nossos Produtos
@@ -88,11 +87,9 @@ export default function BagCategories() {
           </p>
         </div>
 
-        {/* Active bag detail */}
         {activeBag && (
           <div className={`rounded-3xl bg-gradient-to-br ${activeBag.cardBg} border border-[#e4f4ed] overflow-hidden`}>
             <div className="grid lg:grid-cols-2 gap-0">
-              {/* Left: Visual */}
               <div className="p-8 lg:p-12 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-6">
@@ -113,7 +110,6 @@ export default function BagCategories() {
                   </div>
                   <p className="text-[#4a7a66] text-base leading-relaxed mb-6">{activeBag.description}</p>
 
-                  {/* Features */}
                   <div className="flex flex-wrap gap-2 mb-6">
                     {activeBag.features.map((f) => (
                       <span
@@ -129,7 +125,6 @@ export default function BagCategories() {
                   </div>
                 </div>
 
-                {/* Price and CTA */}
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div>
                     <p className="text-[#6b9e8a] text-sm">A partir de</p>
@@ -151,7 +146,6 @@ export default function BagCategories() {
                 </div>
               </div>
 
-              {/* Right: Specs */}
               <div className="bg-white/60 backdrop-blur-sm p-8 lg:p-12 border-t lg:border-t-0 lg:border-l border-[#e4f4ed]">
                 <h4 className="font-bold text-[#264f41] text-lg mb-6">Especificações</h4>
 
@@ -223,7 +217,6 @@ export default function BagCategories() {
           </div>
         )}
 
-        {/* All bags grid (quick view) */}
         <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4">
           {bags.map((bag) => (
             <button

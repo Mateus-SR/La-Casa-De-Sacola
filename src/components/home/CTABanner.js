@@ -3,7 +3,6 @@ import Link from "next/link";
 export default function CTABanner() {
   return (
     <section className="py-20 bg-gradient-to-br from-[#292622] via-[#1a3828] to-[#5ab58f] relative overflow-hidden">
-      {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-[#61c39a] opacity-[0.06] blur-3xl" />
         <div className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-[#3ca779] opacity-[0.05] blur-3xl" />

@@ -15,7 +15,6 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body style={{ fontFamily: "'Manrope', sans-serif" }}>
-        {/* O 'children' é onde o Next.js vai injetar o conteúdo de cada página */}
         {children}
       </body>
     </html>

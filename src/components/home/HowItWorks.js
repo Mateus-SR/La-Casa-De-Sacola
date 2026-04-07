@@ -63,15 +63,12 @@ export default function HowItWorks() {
           </p>
         </div>
 
-        {/* Steps */}
         <div className="relative">
-          {/* Connector line (desktop) */}
           <div className="hidden lg:block absolute top-16 left-[12.5%] right-[12.5%] h-0.5 bg-gradient-to-r from-[#e0f5ea] via-[#3ca779] to-[#e0f5ea]" />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
               <div key={step.number} className="relative flex flex-col items-center text-center group">
-                {/* Step circle */}
                 <div className="relative z-10 w-16 h-16 rounded-2xl bg-white border-2 border-[#c8e3d5] group-hover:border-[#3ca779] group-hover:bg-[#f0faf5] flex items-center justify-center text-[#3ca779] shadow-sm group-hover:shadow-md transition-all mb-5">
                   {step.icon}
                   <div className="absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-[#3ca779] text-white text-xs font-bold flex items-center justify-center shadow">
@@ -88,7 +85,6 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        {/* CTA */}
         <div className="mt-14 text-center">
           <Link
             href="/cadastro"

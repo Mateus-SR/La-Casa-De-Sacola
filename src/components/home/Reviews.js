@@ -136,7 +136,6 @@ export default function Reviews() {
           </p>
         </div>
 
-        {/* Rating summary */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-12 p-6 bg-[#f8fdfb] rounded-3xl border border-[#e4f4ed] max-w-lg mx-auto">
           <div className="text-center">
             <div className="text-6xl font-extrabold text-[#264f41]" style={{ fontFamily: "'Quicksand', sans-serif" }}>
@@ -169,7 +168,6 @@ export default function Reviews() {
           </div>
         </div>
 
-        {/* Reviews grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.slice(0, visibleCount).map((review) => (
             <div
@@ -190,7 +188,6 @@ export default function Reviews() {
                 <span className="text-[#9ab8ae] text-xs">{review.date}</span>
               </div>
 
-              {/* Rating */}
               <div className="flex items-center gap-2 mb-3">
                 <StarRating rating={review.rating} />
                 <span className="text-xs text-[#6b9e8a] bg-[#f0faf5] px-2 py-0.5 rounded-full">
@@ -198,10 +195,8 @@ export default function Reviews() {
                 </span>
               </div>
 
-              {/* Comment */}
               <p className="text-[#4a7a66] text-sm leading-relaxed mb-4">"{review.comment}"</p>
 
-              {/* Photo placeholder */}
               {review.hasPhoto && (
                 <div className={`rounded-2xl bg-gradient-to-br ${review.photoColor} h-24 flex items-center justify-center border border-[#e4f4ed]`}>
                   <div className="flex items-center gap-2 text-[#6b9e8a]">
@@ -216,7 +211,6 @@ export default function Reviews() {
           ))}
         </div>
 
-        {/* Load more */}
         {visibleCount < reviews.length && (
           <div className="text-center mt-8">
             <button
