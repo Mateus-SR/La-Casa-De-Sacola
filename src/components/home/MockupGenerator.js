@@ -36,7 +36,6 @@ const SACOLAS = [
         nome: "Sacola com Cordão",
         emoji: "⬛",
         fotoUrl: "/img/sacolaCordao.jpg",
-        //aumentar um pouco a área e rotacionar para encaixar melhor a arte na foto da sacola com cordão, que é um pouco diferente das outras. Esses ajustes são importantes para que o mockup fique mais realista e a arte do cliente se encaixe direitinho na sacola.
         area: { x: 0.25, y: 0.20, w: 0.50, h: 0.55, rotate: -0.13, skewY: 0.15 } },
 ];
 
@@ -157,15 +156,9 @@ function renderizarMockup() {
   const dx = areaX + (areaW - largura) / 2 + offsetX;
   const dy = areaY + (areaH - altura) / 2 + offsetY;
 
-//   // --- ADICIONE ISSO PARA DEBUGAR ---
-// ctx.strokeStyle = "red";
-// ctx.lineWidth = 2;
-// ctx.strokeRect(areaX, areaY, areaW, areaH); 
-// // ----------------------------------
 
 ctx.save();
 ctx.globalCompositeOperation = "multiply";
-// ... resto do código
 
   // ─── APLICAÇÃO DA ARTE COM TRANSFORMAÇÃO ───
   ctx.save(); 
