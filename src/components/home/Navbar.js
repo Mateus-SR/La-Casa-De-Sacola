@@ -46,6 +46,9 @@ export default function Navbar() {
             <Link href="#contato" className="text-sm font-medium text-[#3a5c4e] hover:text-[#3ca779] transition-colors">
               Contato
             </Link>
+            <Link href="/catalogo" className="hover:text-mint-600 transition-colors">
+             Produtos
+            </Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
