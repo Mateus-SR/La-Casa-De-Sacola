@@ -16,13 +16,15 @@ export default function Cadastro() {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
-    senha: ''
+    senha: '',
+    confirmarSenha: ''
   });
   
   const [errors, setErrors] = useState({
     nome: '',
     email: '',
-    senha: ''
+    senha: '',
+    confirmarSenha: ''
   });
   
   const [loading, setLoading] = useState(false);
@@ -52,7 +54,7 @@ export default function Cadastro() {
   const handleSignUp = async (e) => {
     e.preventDefault();
     
-    let currentErrors = { nome: '', email: '', senha: '' };
+    let currentErrors = { nome: '', email: '', senha: '', confirmarSenha: '' };
     let hasError = false;
 
     // Validação de Nome (Obrigatório)
@@ -71,6 +73,11 @@ export default function Cadastro() {
     // Validação de Senha (Mínimo 8 dígitos)
     if (formData.senha.length < 8) {
       currentErrors.senha = "A senha deve ter pelo menos 8 dígitos.";
+      hasError = true;
+    }
+
+    if (formData.confirmarSenha !== formData.senha) {
+      currentErrors.confirmarSenha = "As senhas não coincidem.";
       hasError = true;
     }
 
@@ -93,8 +100,8 @@ export default function Cadastro() {
       alert("Erro no cadastro: " + error.message);
     } else {
       alert("Cadastro realizado com sucesso! Verifique seu e-mail.");
-      setFormData({ nome: '', email: '', senha: '' });
-      setErrors({ nome: '', email: '', senha: '' });
+      setFormData({ nome: '', email: '', senha: '', confirmarSenha: '' });
+      setErrors({ nome: '', email: '', senha: '', confirmarSenha: '' });
       
       setTimeout(() => {
         router.push("/login");
@@ -165,6 +172,21 @@ export default function Cadastro() {
               {errors.senha && (
                 <span className="text-red-500 text-xs mt-1 ml-1 animate-pulse italic block">
                   {errors.senha}
+                </span>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <AuthPasswordField
+                placeholder="Confirmar senha"
+                revealClass={styles.d5}
+                value={formData.confirmarSenha}
+                onChange={(e) => setFormData({ ...formData, confirmarSenha: e.target.value })}
+                required
+              />
+              {errors.confirmarSenha && (
+                <span className="text-red-500 text-xs mt-1 ml-1 animate-pulse italic block">
+                  {errors.confirmarSenha}
                 </span>
               )}
             </div>
