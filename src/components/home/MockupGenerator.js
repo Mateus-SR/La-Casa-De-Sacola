@@ -2,13 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 
-// ─────────────────────────────────────────────────────────────
-// DADOS DAS SACOLAS
-// "area" define onde a arte do cliente aparece sobre a foto:
-//   x, y → canto superior esquerdo (0.0 a 1.0 do canvas)
-//   w, h  → largura e altura da área (0.0 a 1.0 do canvas)
-// Ajuste esses valores depois de ver cada foto no resultado!
-// ─────────────────────────────────────────────────────────────
+
 const SACOLAS = [
     {
         id: "kraft",
