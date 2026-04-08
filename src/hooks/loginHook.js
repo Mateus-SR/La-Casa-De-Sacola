@@ -23,15 +23,23 @@ export default function useLoginHook({ onError, onSuccess } = {}) {
       });
   
       if (error) {
-        onError?.(getAuthErrorMessage(error, "login"));
+        if (onError) {
+          onError(getAuthErrorMessage(error, "login"));
+        } else {
+          alert("Erro no login: " + error.message);
+        }
       } else {
-        onSuccess?.("Bem-vindo(a)!");
+        if (onSuccess) {
+          onSuccess("Bem-vindo(a)!");
+        } else {
+          alert("Bem-vindo(a)!");
+        }
         setFormData({ email: '', senha: '' });
         
         // Redireciona para o login após 2 segundos para o usuário ler o alerta
         setTimeout(() => {
           router.push("/painel");
-        }, 1800);
+        }, 2000);
       }
       setLoading(false);
     };

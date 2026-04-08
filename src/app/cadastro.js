@@ -64,7 +64,7 @@ export default function Cadastro() {
       setFormData({ nome: "", email: "", senha: "" });
       setTimeout(() => {
         router.push("/login");
-      }, 1800);
+      }, 2000);
     }
 
     setLoading(false);
@@ -72,8 +72,7 @@ export default function Cadastro() {
 
   return (
     <>
-      <meta charSet="UTF-8" />
-      <title>Cadastro</title>
+      <title>Cadastro | La Casa De Sacola</title>
 
       <link
         href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Quicksand:wght@500;700&display=swap"
@@ -121,7 +120,7 @@ export default function Cadastro() {
           </form>
 
           <p className={`${styles.reveal} ${styles.d5} mt-7 text-center text-[#3f705d]`}>
-            Ja tem conta?{" "}
+            Já tem conta?{" "}
             <Link href="/login" className={`${styles.softLink} font-semibold underline-offset-4 hover:underline`}>
               Voltar para login
             </Link>
