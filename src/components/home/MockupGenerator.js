@@ -151,9 +151,6 @@ function renderizarMockup() {
   const dy = areaY + (areaH - altura) / 2 + offsetY;
 
 
-ctx.save();
-ctx.globalCompositeOperation = "multiply";
-
   // ─── APLICAÇÃO DA ARTE COM TRANSFORMAÇÃO ───
   ctx.save(); 
   
