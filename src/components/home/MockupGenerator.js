@@ -9,28 +9,29 @@ const SACOLAS = [
         nome: "Sacola Kraft",
         emoji: "🟤",
         fotoUrl: "/img/sacolaKraft.webp",
-        area: { x: 0.25, y: 0.20, w: 0.50, h: 0.55 },
+        area: {x: 0.25, y: 0.20, w: 0.50, h: 0.55},
     },
     {
         id: "papel",
         nome: "Sacola de Papel",
         emoji: "⬜",
         fotoUrl: "/img/sacolaPapel.webp",
-        area: { x: 0.25, y: 0.20, w: 0.50, h: 0.55 },
+        area: {x: 0.25, y: 0.20, w: 0.50, h: 0.55},
     },
     {
         id: "plastica",
         nome: "Sacola Plástica",
         emoji: "🔵",
         fotoUrl: "/img/sacolaPlastico.jpg",
-        area: { x: 0.25, y: 0.20, w: 0.50, h: 0.55 },
+        area: {x: 0.25, y: 0.20, w: 0.50, h: 0.55},
     },
     {
         id: "cordao",
         nome: "Sacola com Cordão",
         emoji: "⬛",
         fotoUrl: "/img/sacolaCordao.jpg",
-        area: { x: 0.25, y: 0.20, w: 0.50, h: 0.55, rotate: -0.13, skewY: 0.15 } },
+        area: {x: 0.25, y: 0.20, w: 0.50, h: 0.55, rotate: -0.13}
+    },
 ];
 
 const CANVAS_TAMANHO = 500;
@@ -46,7 +47,7 @@ export default function MockupGenerator() {
 
   const canvasRef = useRef(null);
 
-  // ─── Pré-carrega todas as fotos uma vez ao montar ─────────────
+  // Pré-carrega todas as fotos uma vez ao montar
   useEffect(() => {
     SACOLAS.forEach((sacola) => {
       const img = new Image();
@@ -58,14 +59,13 @@ export default function MockupGenerator() {
     });
   }, []);
 
-  // ─── Redesenha sempre que qualquer coisa relevante mudar ──────
-  // IMPORTANTE: imagensSacolas está nas dependências!
-  // Sem isso, quando a foto termina de carregar, o canvas não redesenha.
+  // Redesenha sempre que qualquer coisa relevante mudar
+  // imagensSacolas está nas dependências!
   useEffect(() => {
     renderizarMockup();
   }, [imagemUsuario, sacolaSelecionada, escala, offsetX, offsetY, imagensSacolas]);
 
-  // ─── Lê o arquivo enviado e cria o objeto Image ───────────────
+  // Lê o arquivo enviado e cria o objeto Image
   function carregarImagem(arquivo) {
     if (!arquivo || !arquivo.type.startsWith("image/")) return;
 
@@ -78,7 +78,7 @@ export default function MockupGenerator() {
     leitor.readAsDataURL(arquivo);
   }
 
-  // ─── Eventos de upload ────────────────────────────────────────
+  // Eventos de upload
   function handleDragOver(evento) {
     evento.preventDefault();
     setArrastando(true);
@@ -98,7 +98,7 @@ export default function MockupGenerator() {
     carregarImagem(evento.target.files[0]);
   }
 
-  // ─── Função principal de renderização ────────────────────────
+  // Função principal de renderização
 function renderizarMockup() {
   const canvas = canvasRef.current;
   if (!canvas) return;
@@ -151,10 +151,10 @@ function renderizarMockup() {
   const dy = areaY + (areaH - altura) / 2 + offsetY;
 
 
-  // ─── APLICAÇÃO DA ARTE COM TRANSFORMAÇÃO ───
+  // APLICAÇÃO DA ARTE COM TRANSFORMAÇÃO
   ctx.save(); 
   
-  // 1. Move o ponto de origem para o centro da arte para rotacionar corretamente
+  // 1. Move o ponto de origem para o centro para rotacionar corretamente
   ctx.translate(dx + largura / 2, dy + altura / 2);
   
   // 2. Aplica a rotação definida no objeto da sacola (padrão é 0)
@@ -164,15 +164,15 @@ function renderizarMockup() {
 
   // 3. Aplica o efeito de mesclagem
   ctx.globalCompositeOperation = "multiply";
-  ctx.globalAlpha = 0.9; // Um pouco de transparência ajuda no realismo
+  ctx.globalAlpha = 0.9;
 
-  // 4. Desenha a imagem (ajustando as coordenadas porque o translate moveu o eixo)
+  // 4. Desenha a imagem
   ctx.drawImage(imagemUsuario, -largura / 2, -altura / 2, largura, altura);
   
   ctx.restore(); 
 }
 
-  // ─── Download ─────────────────────────────────────────────────
+  // Download
   function handleDownload() {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -182,7 +182,7 @@ function renderizarMockup() {
     link.click();
   }
 
-  // ─── JSX ──────────────────────────────────────────────────────
+  // JSX
   return (
     <section id="mockup" className="py-20 bg-[#f9f7f4]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -262,7 +262,7 @@ function renderizarMockup() {
               </div>
             </div>
 
-            {/* Sliders — só aparecem após upload */}
+            {/* Sliders */}
             {imagemUsuario && (
               <div className="bg-white rounded-3xl border border-[#e4f4ed] p-6">
                 <p className="text-xs font-semibold text-[#6b9e8a] uppercase tracking-wider mb-4">
