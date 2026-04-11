@@ -311,7 +311,7 @@ export default function Painel() {
 <div className="overflow-x-auto border-2 rounded-t-xl">
 <table className="w-full text-left">
   <thead className="border-2 border-zinc-500">
-    <tr className="bg-zinc-800 text-white ">
+    <tr className="bg-zinc-800 text-white">
       <th className="p-3">Nome de Exibição</th>
       <th className="p-3">Material da Sacola</th>
       <th className="p-3 text-center">Qtd. Mínima</th>
