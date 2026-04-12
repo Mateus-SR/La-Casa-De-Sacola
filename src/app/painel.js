@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import useLoginHook from "../hooks/loginHook.js" // precisa trocar pra um que valide se o usuário já está logado (ou então adicionar essa logica dentro do loginHook)
+import RotaAdmin from "../components/admin/rotaAdmin"
 import { useState, useEffect } from "react";
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
@@ -139,9 +140,10 @@ export default function Painel() {
   };
 
   return (
+    <RotaAdmin>
     <main className="p-5 m-auto bg-gray-100">
       <meta charSet="UTF-8" />
-      <title>Login</title>
+      <title>Painel Administrador</title>
 
       <div className="mb-4">
         <h1 className="text-xl font-extrabold">Painel Administrador</h1>
@@ -319,7 +321,7 @@ export default function Painel() {
       <th className="p-3 text-center">Tamanho</th>
       <th className="p-3 text-center">Peso</th>
       <th className="p-3 text-center">Status</th>
-      <th className="p-3 text-center">Ações</th> {/* Reservado para Editar/Excluir */}
+      <th className="p-3 text-center">Ações</th>
     </tr>
   </thead>
   <tbody className="bg-white border-gray-300">
@@ -347,5 +349,6 @@ export default function Painel() {
 
       
     </main>
+    </RotaAdmin>
   );
 }
