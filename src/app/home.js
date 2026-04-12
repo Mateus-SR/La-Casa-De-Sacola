@@ -8,6 +8,7 @@ import Reviews from "../components/home/Reviews";
 import CTABanner from "../components/home/CTABanner";
 import Footer from "../components/home/Footer";
 import MockupGenerator from "../components/home/MockupGenerator";
+import FeedAPI from "../components/home/FeedAPI";
 
 export default function HomePage() {
   return (
@@ -25,6 +26,7 @@ export default function HomePage() {
         <Benefits />
         <BagCategories />
         <MockupGenerator />
+        <FeedAPI />
         <HowItWorks />
         <AboutSection />
         <Reviews />
