@@ -141,7 +141,7 @@ export default function Painel() {
 
   return (
     <RotaAdmin>
-    <main className="p-5 m-auto bg-gray-100">
+    <main className="p-5 m-auto bg-gray-100 h-screen flex flex-col">
       <meta charSet="UTF-8" />
       <title>Painel Administrador</title>
 
@@ -310,9 +310,9 @@ export default function Painel() {
       </Dialog.Root>
 </div>
 
-<div className="overflow-x-auto border-2 rounded-t-xl">
+<div className="overflow-x-auto overflow-y-auto border-2 rounded-t-xl flex-1 custom-scrollbar">
 <table className="w-full text-left">
-  <thead className="border-2 border-zinc-500">
+  <thead className="sticky top-0 z-10 bg-zinc-800 text-white border-b-2 border-zinc-500">
     <tr className="bg-zinc-800 text-white">
       <th className="p-3">Nome de Exibição</th>
       <th className="p-3">Material da Sacola</th>
