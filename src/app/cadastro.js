@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation"; 
+import { Toaster, toast } from "react-hot-toast";
 import { supabase } from "../lib/supabaseClient";
 import AuthBackground from "../components/auth/AuthBackground";
 import AuthButton from "../components/auth/AuthButton";
@@ -31,6 +32,29 @@ export default function Cadastro() {
 
   // Lista de domínios permitidos
   const allowedDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com"];
+
+  const getMensagemErroCadastro = (error) => {
+    const message = (error?.message || "").toLowerCase();
+    const code = error?.code;
+
+    if (code === "user_already_exists" || message.includes("user already registered")) {
+      return "Este e-mail ja esta cadastrado.";
+    }
+
+    if (message.includes("invalid email") || message.includes("unable to validate email address")) {
+      return "E-mail invalido.";
+    }
+
+    if (message.includes("password should be at least")) {
+      return "A senha deve ter pelo menos 8 caracteres.";
+    }
+
+    if (message.includes("signup is disabled")) {
+      return "O cadastro esta desativado no momento.";
+    }
+
+    return "Nao foi possivel concluir o cadastro. Tente novamente.";
+  };
 
   const validateEmail = (email) => {
     const emailLower = email.toLowerCase();
@@ -97,9 +121,9 @@ export default function Cadastro() {
     });
 
     if (error) {
-      alert("Erro no cadastro: " + error.message);
+      toast.error(getMensagemErroCadastro(error));
     } else {
-      alert("Cadastro realizado com sucesso! Verifique seu e-mail.");
+      toast.success("Cadastro realizado com sucesso! Verifique seu e-mail.");
       setFormData({ nome: '', email: '', senha: '', confirmarSenha: '' });
       setErrors({ nome: '', email: '', senha: '', confirmarSenha: '' });
       
@@ -112,6 +136,7 @@ export default function Cadastro() {
 
   return (
     <>
+      <Toaster position="top-right" />
       <title>Cadastro | La Casa De Sacola</title>
       
       <link

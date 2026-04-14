@@ -10,3 +10,5 @@ export default function sacolaCRUD() {
         sacolas
       }
 }
+
+// Por enquanto isso aqui é inutil, ainda não trouxe nada de verdade e eram só testes aqui
