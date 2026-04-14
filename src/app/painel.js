@@ -304,7 +304,7 @@ export default function Painel() {
           <Dialog.Overlay className="bg-black/50 fixed inset-0 backdrop-blur-sm z-40" />
           
           {/* A caixa branca no centro */}
-          <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl w-full max-w-md z-[100] h-5/6 md:h-auto lg:h-auto overflow-auto custom-scrollbar">
+          <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-2xl w-[min(92vw,40rem)] max-h-[90vh] z-[100] overflow-y-auto custom-scrollbar">
             <Dialog.Title className="text-md lg:text-xl font-extrabold mb-6">{sacolaEditandoId ? 'Editar Sacola' : 'Adicionar Nova Sacola'}</Dialog.Title>
 
             {/* O SEU FORMULÁRIO ENTRA AQUI! */}
