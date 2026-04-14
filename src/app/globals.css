@@ -13,9 +13,9 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #52525b;
+  background: #3f705d;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #27272a;
+  background: #2f5546;
 }
