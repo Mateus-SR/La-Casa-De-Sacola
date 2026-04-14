@@ -17,9 +17,10 @@ const bags = [
     iconBg: "bg-[#3ca779]",
     iconColor: "text-white",
     icon: (
-      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-4-4H5a4 4 0 00-4 4v10a4 4 0 004 4h6" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7v10m4-10v10" />
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v-1.5a1 1 0 011-1h6a1 1 0 011 1V4" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v3m8-3v3" />
       </svg>
     ),
     features: ["Papel reciclável", "Alta resistência", "Acabamento premium"],
@@ -39,8 +40,11 @@ const bags = [
     iconBg: "bg-[#264f41]",
     iconColor: "text-white",
     icon: (
-      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7 20H5a2 2 0 01-2-2V9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2h-5l-4 4v-4z" />
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 6h14c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 6v-2a1 1 0 011-1h6a1 1 0 011 1v2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 6v2m8-2v2" />
+        <line x1="12" y1="10" x2="12" y2="16" strokeLinecap="round" />
       </svg>
     ),
     features: ["Acabamento laminado", "Alta qualidade", "Impressão vibrante"],
@@ -60,10 +64,11 @@ const bags = [
     iconBg: "bg-[#f59e0b]",
     iconColor: "text-white",
     icon: (
-      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-        <line x1="3" y1="6" x2="21" y2="6" strokeLinecap="round" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16 10a4 4 0 01-8 0" />
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v-1.5a1 1 0 011-1h6a1 1 0 011 1V4" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v3m8-3v3" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 10h6" />
       </svg>
     ),
     features: ["Impermeável", "Alta durabilidade", "Custo acessível"],
@@ -83,8 +88,11 @@ const bags = [
     iconBg: "bg-gradient-to-br from-[#b8860b] to-[#d4a017]",
     iconColor: "text-white",
     icon: (
-      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 2v2m8-2v2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v2m8-2v2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12" />
       </svg>
     ),
     features: ["Alça de cordão", "Acabamento luxuoso", "Ideal para presentes"],
