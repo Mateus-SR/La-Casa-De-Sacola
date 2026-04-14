@@ -8,12 +8,14 @@ import AuthField from "../components/auth/AuthField";
 import AuthPasswordField from "../components/auth/AuthPasswordField";
 import AuthTextLink from "../components/auth/AuthTextLink";
 import styles from "../components/auth/auth.module.css";
+import { Toaster } from "react-hot-toast";
 import useLoginHook from "../hooks/loginHook.js"
 
 export default function Login() {
   const { formData, setFormData, loading, handleSignIn } = useLoginHook();
   return (
     <>
+      <Toaster position="top-right" />
       <meta charSet="UTF-8" />
       <title>Login</title>
 
