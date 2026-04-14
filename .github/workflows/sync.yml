@@ -1,0 +1,23 @@
+name: Sync Fork Automático
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Roda automaticamente a cada 1 hora
+  workflow_dispatch: # Permite que você clique em um botão para sincronizar na hora
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync Upstream
+        uses: dabreadman/sync-upstream-github@v1.3.0
+        with:
+          upstream_repository: Mateus-SR/La-Casa-De-Sacola
+          upstream_branch: main
+          target_branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -16,13 +16,13 @@
 .loginCard {
   box-sizing: border-box;
   width: min(100%, 460px);
-  border: 1px solid rgba(228, 244, 237, 0.42);
+  border: 1px solid rgba(228, 244, 237, 0.66);
   border-radius: 28px;
   padding: 34px 30px 30px;
-  background: linear-gradient(150deg, rgba(243, 252, 247, 0.34), rgba(255, 255, 255, 0.18));
+  background: linear-gradient(150deg, rgba(243, 252, 247, 0.72), rgba(255, 255, 255, 0.54));
   box-shadow: 0 20px 42px rgba(5, 20, 15, 0.2);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .loginContent {
