@@ -34,7 +34,7 @@ export default function Navbar() {
 
           {/* Desktop nav links */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="#categorias" className="text-sm font-medium text-[#3a5c4e] hover:text-[#3ca779] transition-colors">
+            <Link href="/#categorias" className="text-sm font-medium text-[#3a5c4e] hover:text-[#3ca779] transition-colors">
               Sacolas
             </Link>
             <Link href="#como-funciona" className="text-sm font-medium text-[#3a5c4e] hover:text-[#3ca779] transition-colors">
@@ -92,6 +92,7 @@ export default function Navbar() {
           <Link href="#como-funciona" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Como Funciona</Link>
           <Link href="#avaliacoes" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Avaliações</Link>
           <Link href="#contato" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Contato</Link>
+          <Link href="/catalogo" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Produtos Modelos</Link>
           <div className="flex gap-3 pt-2">
             <Link href="/login" className="flex-1 text-center text-sm font-semibold text-[#3ca779] border border-[#61c39a] rounded-xl px-4 py-2">Entrar</Link>
             <Link href="/cadastro" className="flex-1 text-center text-sm font-semibold text-white bg-[#3ca779] rounded-xl px-4 py-2">Fazer Pedido</Link>

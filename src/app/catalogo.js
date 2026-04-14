@@ -33,10 +33,10 @@ export default function ProdutosModelos() {
 
     // Buscando da tabela 'sacola' que identificamos no seu painel admin
     const { data, error, count } = await supabase
-      .from('sacola')
-      .select('*', { count: 'exact' })
-      .eq('status_sac', 'Disponível') // Apenas o que o admin marcou como disponível
-      .range(de, ate);
+    .from('sacola')
+    .select('*', { count: 'exact' })
+    .neq('status_sac', 'Oculto') // Exibe tudo que NÃO for 'Oculto'
+    .range(de, ate);
 
     if (error) {
       console.error("Erro ao carregar produtos:", error);
