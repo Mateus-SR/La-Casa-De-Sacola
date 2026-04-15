@@ -59,7 +59,11 @@ export default function Hero() {
           </div>
 
           <div className="relative flex items-center justify-center">
-            
+            <img 
+              src="/img/sacola.png" 
+              alt="Sacolas personalizadas de diferentes tipos" 
+              className="w-full max-w-md rounded-2xl shadow-2xl object-cover"
+            />
           </div>
         </div>
       </div>

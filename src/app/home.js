@@ -1,4 +1,4 @@
-import Navbar from "../components/home/Navbar";
+import Navbar from "../components/layout/Navbar";
 import Hero from "../components/home/Hero";
 import Benefits from "../components/home/Benefits";
 import BagCategories from "../components/home/BagCategories";
@@ -6,7 +6,7 @@ import HowItWorks from "../components/home/HowItWorks";
 import AboutSection from "../components/home/AboutSection";
 import Reviews from "../components/home/Reviews";
 import CTABanner from "../components/home/CTABanner";
-import Footer from "../components/home/Footer";
+import Footer from "../components/layout/Footer";
 
 export default function HomePage() {
   return (
