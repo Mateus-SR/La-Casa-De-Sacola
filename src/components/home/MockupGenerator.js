@@ -59,8 +59,6 @@ export default function MockupGenerator() {
     });
   }, []);
 
-  // Redesenha sempre que qualquer coisa relevante mudar
-  // imagensSacolas está nas dependências!
   useEffect(() => {
     renderizarMockup();
   }, [imagemUsuario, sacolaSelecionada, escala, offsetX, offsetY, imagensSacolas]);
@@ -154,19 +152,14 @@ function renderizarMockup() {
   // APLICAÇÃO DA ARTE COM TRANSFORMAÇÃO
   ctx.save(); 
   
-  // 1. Move o ponto de origem para o centro para rotacionar corretamente
+  // Move o ponto de origem pro centro
   ctx.translate(dx + largura / 2, dy + altura / 2);
   
-  // 2. Aplica a rotação definida no objeto da sacola (padrão é 0)
+  // Aplica a rotação definida no objeto da sacola (padrão é 0)
   if (area.rotate) {
     ctx.rotate(area.rotate);
   }
-
-  // 3. Aplica o efeito de mesclagem
-  ctx.globalCompositeOperation = "multiply";
-  ctx.globalAlpha = 0.9;
-
-  // 4. Desenha a imagem
+  // Desenha a imagem
   ctx.drawImage(imagemUsuario, -largura / 2, -altura / 2, largura, altura);
   
   ctx.restore(); 
@@ -208,7 +201,7 @@ function renderizarMockup() {
           {/* Coluna esquerda: controles */}
           <div className="flex flex-col gap-6">
 
-            {/* Área de upload */}
+            {/* Upload */}
             <label
               className={`flex flex-col items-center justify-center gap-3 p-10 rounded-3xl border-2 border-dashed cursor-pointer transition-all ${
                 arrastando
