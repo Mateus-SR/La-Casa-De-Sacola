@@ -23,8 +23,6 @@ export default function HomePage() {
         <Hero />
         <Benefits />
         <BagCategories />
-        <MockupGenerator />
-        <FeedAPI />
         <HowItWorks />
         <AboutSection />
         <Reviews />
