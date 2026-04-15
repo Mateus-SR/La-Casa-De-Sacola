@@ -6,7 +6,7 @@ import HowItWorks from "../components/home/HowItWorks";
 import AboutSection from "../components/home/AboutSection";
 import Reviews from "../components/home/Reviews";
 import CTABanner from "../components/home/CTABanner";
-import Footer from "../components/home/Footer";
+import Footer from "../components/layout/Footer";
 
 export default function HomePage() {
   return (
