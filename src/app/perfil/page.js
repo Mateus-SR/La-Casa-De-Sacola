@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Toaster, toast } from "react-hot-toast";
 import { supabase } from "../../lib/supabaseClient";
-import Navbar from "../../components/home/Navbar";
-import Footer from "../../components/home/Footer";
+import Navbar from "../../components/layout/Navbar";
+import Footer from "../../components/layout/Footer";
 import {
   ChevronRightIcon,
   EnvelopeIcon,

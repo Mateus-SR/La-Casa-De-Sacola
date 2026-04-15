@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import Navbar from "../../components/home/Navbar";
-import Footer from "../../components/home/Footer";
+import Navbar from "../../components/layout/Navbar";
+import Footer from "../../components/layout/Footer";
 import toast from "react-hot-toast";
 import * as Dialog from '@radix-ui/react-dialog';
 import { MapPinIcon, PlusIcon, TrashIcon, XMarkIcon, ArrowPathIcon } from "@heroicons/react/24/outline";

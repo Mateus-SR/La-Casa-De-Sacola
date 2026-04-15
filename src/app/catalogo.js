@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
-import Navbar from "../components/home/Navbar";
-import Footer from "../components/home/Footer";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 
 export default function ProdutosModelos() {

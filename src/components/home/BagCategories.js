@@ -18,6 +18,14 @@ const bags = [
     highlightColor: "bg-[#3ca779] text-white",
     cardBg: "from-[#f0faf5] to-[#e0f5ea]",
     iconBg: "bg-[#3ca779]",
+    iconColor: "text-white",
+    icon: (
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v-1.5a1 1 0 011-1h6a1 1 0 011 1V4" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v3m8-3v3" />
+      </svg>
+    ),
     features: ["Papel reciclável", "Alta resistência", "Acabamento premium"],
     basePrice: "R$ 1,20",
   },
@@ -34,6 +42,15 @@ const bags = [
     highlightColor: "bg-[#264f41] text-white",
     cardBg: "from-[#f5f0fa] to-[#ede0f5]",
     iconBg: "bg-[#264f41]",
+    iconColor: "text-white",
+    icon: (
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 6h14c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 6v-2a1 1 0 011-1h6a1 1 0 011 1v2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 6v2m8-2v2" />
+        <line x1="12" y1="10" x2="12" y2="16" strokeLinecap="round" />
+      </svg>
+    ),
     features: ["Acabamento laminado", "Alta qualidade", "Impressão vibrante"],
     basePrice: "R$ 1,80",
   },
@@ -50,6 +67,15 @@ const bags = [
     highlightColor: "bg-[#f59e0b] text-white",
     cardBg: "from-[#fffbf0] to-[#fef3c7]",
     iconBg: "bg-[#f59e0b]",
+    iconColor: "text-white",
+    icon: (
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v-1.5a1 1 0 011-1h6a1 1 0 011 1V4" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v3m8-3v3" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 10h6" />
+      </svg>
+    ),
     features: ["Impermeável", "Alta durabilidade", "Custo acessível"],
     basePrice: "R$ 0,45",
   },
@@ -66,6 +92,15 @@ const bags = [
     highlightColor: "bg-gradient-to-r from-[#b8860b] to-[#d4a017] text-white",
     cardBg: "from-[#fdf8f0] to-[#faf0e0]",
     iconBg: "bg-gradient-to-br from-[#b8860b] to-[#d4a017]",
+    iconColor: "text-white",
+    icon: (
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 2v2m8-2v2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 4v2m8-2v2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h12" />
+      </svg>
+    ),
     features: ["Alça de cordão", "Acabamento luxuoso", "Ideal para presentes"],
     basePrice: "R$ 2,50",
   },
@@ -114,8 +149,8 @@ export default function BagCategories() {
               <div className="p-8 lg:p-12 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-14 h-14 rounded-2xl ${activeBag.iconBg} flex items-center justify-center text-2xl shadow-lg`}>
-                      {activeBag.emoji}
+                    <div className={`w-14 h-14 rounded-2xl ${activeBag.iconBg} flex items-center justify-center ${activeBag.iconColor} shadow-lg`}>
+                      {activeBag.icon}
                     </div>
                     <div>
                       <div className={`inline-block text-xs font-bold px-3 py-1 rounded-full mb-1 ${activeBag.highlightColor}`}>
@@ -233,7 +268,9 @@ export default function BagCategories() {
                   : "border-[#e4f4ed] bg-white hover:border-[#61c39a] hover:bg-[#f8fdfb]"
               }`}
             >
-              <div className="text-2xl mb-2">{bag.emoji}</div>
+              <div className={`w-10 h-10 rounded-lg ${bag.iconBg} flex items-center justify-center ${bag.iconColor} mb-2`}>
+                {bag.icon}
+              </div>
               <p className="font-bold text-[#264f41] text-sm">{bag.name}</p>
               <p className="text-[#6b9e8a] text-xs mt-0.5">A partir de {bag.basePrice}</p>
               <p className="text-[#9ab8ae] text-xs">Mín. {bag.minQty} unid.</p>
