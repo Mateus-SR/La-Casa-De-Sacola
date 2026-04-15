@@ -10,7 +10,7 @@ const getMensagemErroLogin = (error) => {
   const code = error?.code;
 
   if (code === 'invalid_credentials' || message.includes('invalid login credentials')) {
-    return 'E-mail ou senha invalidos.';
+    return 'E-mail ou senha inválidos.';
   }
 
   if (message.includes('email not confirmed')) {
@@ -18,14 +18,14 @@ const getMensagemErroLogin = (error) => {
   }
 
   if (message.includes('invalid email') || message.includes('unable to validate email address')) {
-    return 'E-mail invalido.';
+    return 'E-mail inválido.';
   }
 
-  return 'Nao foi possivel realizar o login. Tente novamente.';
+  return 'Não foi possível realizar o login. Tente novamente.';
 };
 
 export default function useLoginHook() {
-    const router = useRouter(); // Inicializa o roteador
+    const router = useRouter();
     const [formData, setFormData] = useState({
       email: '',
       senha: ''
@@ -36,22 +36,44 @@ export default function useLoginHook() {
       e.preventDefault();
       setLoading(true);
   
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // 1. Tenta realizar a autenticação
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.senha,
       });
   
-      if (error) {
-        toast.error(getMensagemErroLogin(error));
-      } else {
-        toast.success('Bem-vindo(a)!');
-        setFormData({ email: '', senha: '' });
-        
-        // Redireciona para o painel apos 2 segundos para o usuario ler o toast
-        setTimeout(() => {
-          router.push("/painel");
-        }, 2000);
+      if (authError) {
+        toast.error(getMensagemErroLogin(authError));
+        setLoading(false);
+        return;
       }
+
+      // 2. Se logou com sucesso, busca o cargo do usuário na tabela personalizada
+      const { data: perfil, error: perfilError } = await supabase
+        .from('usuario')
+        .select('cargo')
+        .eq('uuid_usu', authData.user.id)
+        .single();
+
+      if (perfilError) {
+        console.error("Erro ao buscar perfil:", perfilError);
+        toast.success('Bem-vindo(a)!');
+        router.push("/"); // Por segurança, se não achar o cargo, manda pra home
+        return;
+      }
+
+      toast.success('Bem-vindo(a)!');
+      setFormData({ email: '', senha: '' });
+      
+      // 3. Redireciona com base no cargo após 2 segundos
+      setTimeout(() => {
+        if (perfil?.cargo === 'administrador') {
+          router.push("/painel");
+        } else {
+          router.push("/");
+        }
+      }, 2000);
+
       setLoading(false);
     };
 

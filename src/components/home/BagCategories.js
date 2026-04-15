@@ -1,11 +1,14 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabaseClient";
+import toast from "react-hot-toast";
 
 const bags = [
   {
     id: "kraft",
     name: "Sacola Kraft",
+    emoji: "🛍️",
     description: "Resistente e sustentável, feita de papel kraft. Ideal para lojas de moda, presentes e produtos premium.",
     minQty: 50,
     grammages: ["80g/m²", "100g/m²", "120g/m²"],
@@ -29,6 +32,7 @@ const bags = [
   {
     id: "papel",
     name: "Sacola de Papel",
+    emoji: "📄",
     description: "Versátil e elegante, com acabamento liso ou texturizado. Perfeita para embalagens sofisticadas.",
     minQty: 100,
     grammages: ["120g/m²", "150g/m²", "180g/m²"],
@@ -53,6 +57,7 @@ const bags = [
   {
     id: "plastica",
     name: "Sacola Plástica",
+    emoji: "♻️",
     description: "Durável e impermeável, com impressão em alta definição. Ideal para supermercados e varejo.",
     minQty: 200,
     grammages: ["0,06mm", "0,08mm", "0,10mm"],
@@ -77,6 +82,7 @@ const bags = [
   {
     id: "cordao",
     name: "Sacola com Cordão",
+    emoji: "🎀",
     description: "Sofisticada com alça de cordão. Transmite exclusividade e é perfeita para presentes e eventos.",
     minQty: 50,
     grammages: ["150g/m²", "180g/m²", "250g/m²"],
@@ -102,7 +108,22 @@ const bags = [
 
 export default function BagCategories() {
   const [activeTab, setActiveTab] = useState("kraft");
+  const router = useRouter();
   const activeBag = bags.find((b) => b.id === activeTab);
+
+  const handlePedido = async (sacola) => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      toast.error("Você precisa estar logado para fazer um pedido!");
+      router.push("/login");
+      return;
+    }
+
+    // Se estiver logado, redireciona para a página de pedidos ou WhatsApp
+    const mensagem = `Olá! Gostaria de pedir o modelo ${sacola.name}.`;
+    window.open(`https://wa.me/SEUNUMERO?text=${encodeURIComponent(mensagem)}`, "_blank");
+  };
 
   return (
     <section id="categorias" className="py-20 bg-white">
@@ -169,68 +190,54 @@ export default function BagCategories() {
                     </p>
                     <p className="text-[#6b9e8a] text-xs mt-0.5">Mínimo: {activeBag.minQty} unidades</p>
                   </div>
-                  <Link
-                    href="/cadastro"
+                  <button
+                    onClick={() => handlePedido(activeBag)}
                     className="inline-flex items-center gap-2 bg-[#3ca779] hover:bg-[#2e8f65] text-white font-bold px-6 py-3 rounded-2xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                   >
                     Pedir Agora
                     <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
-                  </Link>
+                  </button>
                 </div>
               </div>
 
               <div className="bg-white/60 backdrop-blur-sm p-8 lg:p-12 border-t lg:border-t-0 lg:border-l border-[#e4f4ed]">
                 <h4 className="font-bold text-[#264f41] text-lg mb-6">Especificações</h4>
-
                 <div className="space-y-5">
-                  {/* Gramatura */}
                   <div>
                     <p className="text-xs font-semibold text-[#6b9e8a] uppercase tracking-wider mb-2">Gramatura / Espessura</p>
                     <div className="flex flex-wrap gap-2">
                       {activeBag.grammages.map((g) => (
-                        <span
-                          key={g}
-                          className="bg-[#f0faf5] border border-[#c8e3d5] text-[#264f41] text-sm font-medium px-3 py-1 rounded-xl"
-                        >
+                        <span key={g} className="bg-[#f0faf5] border border-[#c8e3d5] text-[#264f41] text-sm font-medium px-3 py-1 rounded-xl">
                           {g}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Cores */}
                   <div>
                     <p className="text-xs font-semibold text-[#6b9e8a] uppercase tracking-wider mb-2">Opções de Impressão</p>
                     <div className="flex flex-wrap gap-2">
                       {activeBag.colors.map((c) => (
-                        <span
-                          key={c}
-                          className="bg-[#f0faf5] border border-[#c8e3d5] text-[#264f41] text-sm font-medium px-3 py-1 rounded-xl"
-                        >
+                        <span key={c} className="bg-[#f0faf5] border border-[#c8e3d5] text-[#264f41] text-sm font-medium px-3 py-1 rounded-xl">
                           {c}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Tamanhos */}
                   <div>
                     <p className="text-xs font-semibold text-[#6b9e8a] uppercase tracking-wider mb-2">Tamanhos Disponíveis</p>
                     <div className="flex flex-wrap gap-2">
                       {activeBag.sizes.map((s) => (
-                        <span
-                          key={s}
-                          className="bg-[#f0faf5] border border-[#c8e3d5] text-[#264f41] text-sm font-medium px-3 py-1 rounded-xl"
-                        >
+                        <span key={s} className="bg-[#f0faf5] border border-[#c8e3d5] text-[#264f41] text-sm font-medium px-3 py-1 rounded-xl">
                           {s}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Quantidade mínima */}
                   <div className="bg-[#f0faf5] rounded-2xl p-4 border border-[#c8e3d5]">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-[#3ca779] flex items-center justify-center flex-shrink-0">
@@ -240,9 +247,7 @@ export default function BagCategories() {
                       </div>
                       <div>
                         <p className="font-bold text-[#264f41] text-sm">Quantidade mínima</p>
-                        <p className="text-[#6b9e8a] text-sm">
-                          {activeBag.minQty} unidades por pedido
-                        </p>
+                        <p className="text-[#6b9e8a] text-sm">{activeBag.minQty} unidades por pedido</p>
                       </div>
                     </div>
                   </div>

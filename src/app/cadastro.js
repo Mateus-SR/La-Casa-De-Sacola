@@ -30,7 +30,6 @@ export default function Cadastro() {
   
   const [loading, setLoading] = useState(false);
 
-  // Lista de domínios permitidos
   const allowedDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com"];
 
   const getMensagemErroCadastro = (error) => {
@@ -38,32 +37,22 @@ export default function Cadastro() {
     const code = error?.code;
 
     if (code === "user_already_exists" || message.includes("user already registered")) {
-      return "Este e-mail ja esta cadastrado.";
+      return "Este e-mail já está cadastrado.";
     }
-
     if (message.includes("invalid email") || message.includes("unable to validate email address")) {
-      return "E-mail invalido.";
+      return "E-mail inválido.";
     }
-
     if (message.includes("password should be at least")) {
       return "A senha deve ter pelo menos 8 caracteres.";
     }
-
-    if (message.includes("signup is disabled")) {
-      return "O cadastro esta desativado no momento.";
-    }
-
-    return "Nao foi possivel concluir o cadastro. Tente novamente.";
+    return "Não foi possível concluir o cadastro. Tente novamente.";
   };
 
   const validateEmail = (email) => {
     const emailLower = email.toLowerCase();
-    
-    // 1. Validação de formato básico (Regex)
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (!re.test(emailLower)) return { valid: false, message: "Formato de e-mail inválido." };
 
-    // 2. Validação de domínio específico
     const domain = emailLower.split('@')[1];
     if (!allowedDomains.includes(domain)) {
       return { 
@@ -71,7 +60,6 @@ export default function Cadastro() {
         message: "Use um e-mail válido (Gmail, Yahoo, Outlook, etc)." 
       };
     }
-
     return { valid: true };
   };
 
@@ -81,25 +69,20 @@ export default function Cadastro() {
     let currentErrors = { nome: '', email: '', senha: '', confirmarSenha: '' };
     let hasError = false;
 
-    // Validação de Nome (Obrigatório)
+    // Validações
     if (formData.nome.trim().length < 3) {
       currentErrors.nome = "Por favor, insira seu nome completo.";
       hasError = true;
     }
-
-    // Validação de E-mail com restrição de domínio
     const emailCheck = validateEmail(formData.email);
     if (!emailCheck.valid) {
       currentErrors.email = emailCheck.message;
       hasError = true;
     }
-
-    // Validação de Senha (Mínimo 8 dígitos)
     if (formData.senha.length < 8) {
       currentErrors.senha = "A senha deve ter pelo menos 8 dígitos.";
       hasError = true;
     }
-
     if (formData.confirmarSenha !== formData.senha) {
       currentErrors.confirmarSenha = "As senhas não coincidem.";
       hasError = true;
@@ -110,7 +93,8 @@ export default function Cadastro() {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
+    // 1. Cria o usuário na Autenticação do Supabase
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.senha,
       options: {
@@ -120,17 +104,37 @@ export default function Cadastro() {
       },
     });
 
-    if (error) {
-      toast.error(getMensagemErroCadastro(error));
-    } else {
-      toast.success("Cadastro realizado com sucesso! Verifique seu e-mail.");
-      setFormData({ nome: '', email: '', senha: '', confirmarSenha: '' });
-      setErrors({ nome: '', email: '', senha: '', confirmarSenha: '' });
-      
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+    if (authError) {
+      toast.error(getMensagemErroCadastro(authError));
+      setLoading(false);
+      return;
     }
+
+    // 2. SALVA NA TABELA 'usuario'
+    if (authData.user) {
+      const { error: dbError } = await supabase
+        .from('usuario')
+        .upsert({ 
+          uuid_usu: authData.user.id, 
+          nome_usu: formData.nome,    
+          email_usu: formData.email,  
+          cargo: 'cliente'            
+        }, { onConflict: 'uuid_usu' });
+
+      if (dbError) {
+        console.error("Erro ao salvar dados na tabela usuario:", dbError);
+        toast.error("Erro ao criar perfil no banco de dados.");
+      } else {
+        toast.success("Cadastro realizado! Verifique seu e-mail.");
+        setFormData({ nome: '', email: '', senha: '', confirmarSenha: '' });
+        setErrors({ nome: '', email: '', senha: '', confirmarSenha: '' });
+        
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      }
+    }
+
     setLoading(false);
   };
 

@@ -9,7 +9,7 @@
 
 .loginBg {
   background:
-    linear-gradient(180deg, rgba(12, 26, 20, 0.18) 0%, rgba(12, 26, 20, 0.3) 100%),
+    linear-gradient(180deg, rgba(12, 26, 20, 0.30) 0%, rgba(12, 26, 20, 0.3) 100%),
     url('/img/img_login.png') center/cover no-repeat;
 }
 
@@ -19,10 +19,10 @@
   border: 1px solid rgba(228, 244, 237, 0.66);
   border-radius: 28px;
   padding: 34px 30px 30px;
-  background: linear-gradient(150deg, rgba(243, 252, 247, 0.72), rgba(255, 255, 255, 0.54));
+  background: linear-gradient(150deg, rgba(243, 252, 247, 0.9), rgba(255, 255, 255, 0.8));
   box-shadow: 0 20px 42px rgba(5, 20, 15, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .loginContent {
