@@ -51,10 +51,15 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setDropdownOpen(false);
-    setMenuOpen(false);
-    router.push("/");
+    try {
+      await supabase.auth.signOut();
+    } catch(error) {
+      console.error("Erro no Logout:", error)
+    } finally {
+      setDropdownOpen(false);
+      setMenuOpen(false);
+      window.location.href= "/";
+    }
   };
 
   return (

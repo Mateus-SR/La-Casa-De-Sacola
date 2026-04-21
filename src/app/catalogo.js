@@ -52,8 +52,9 @@ export default function ProdutosModelos() {
   }
 };
 
-  const carregarProdutos = async () => {
-    setLoading(true);
+const carregarProdutos = async () => {
+  try {
+    setLoading(true); // 1. Começa a carregar
     
     const de = (paginaAtual - 1) * itensPorPagina;
     const ate = de + itensPorPagina - 1;
@@ -77,14 +78,24 @@ export default function ProdutosModelos() {
 
     const { data, error, count } = await query.range(de, ate);
 
+    // 2. Se o Supabase reclamar, joga o erro para o catch
     if (error) {
-      console.error("Erro ao carregar produtos:", error);
-    } else {
-      setProdutos(data || []);
-      setTotalPaginas(Math.ceil((count || 0) / itensPorPagina));
-    }
-    setLoading(false);
-  };
+      throw error; 
+    } 
+    
+    // 3. Se deu tudo certo, atualiza os estados
+    setProdutos(data || []);
+    setTotalPaginas(Math.ceil((count || 0) / itensPorPagina));
+
+  } catch (error) {
+    // 4. O CATCH captura qualquer erro (do try ou do throw acima)
+    console.error("Erro ao carregar produtos:", error);
+    
+  } finally {
+    // 5. O FINALLY executa aconteça o que acontecer, destravando a tela
+    setLoading(false); 
+  }
+};
 
   const limparFiltros = () => {
     setFiltroTipo("");

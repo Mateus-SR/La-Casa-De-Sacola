@@ -44,11 +44,12 @@ export default function useLoginHook() {
   
       if (authError) {
         toast.error(getMensagemErroLogin(authError));
-        setLoading(false);
         return;
       }
 
       // 2. Se logou com sucesso, busca o cargo do usuário na tabela personalizada
+      try {
+
       const { data: perfil, error: perfilError } = await supabase
         .from('usuario')
         .select('cargo')
@@ -70,7 +71,10 @@ export default function useLoginHook() {
         router.push("/");
       }, 2000);
 
+      
+    } finally {
       setLoading(false);
+    }
     };
 
     return {

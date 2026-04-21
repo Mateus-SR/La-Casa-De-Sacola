@@ -11,13 +11,12 @@ export default function useVerificaAcessoAdmin() {
 
     useEffect(() =>{
         const verificarAcessoAdmin = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            try{ 
+            const { data: { user }, error: sessionError } = await supabase.auth.getUser();
 
             // Caso tente acessar uma pagina apenas para administradores, mas estiver sem conta (sem usuário), impede e manda pro login
-            if (!user) {
-                setTimeout(() => {
-                    router.push("/login");
-                  }, 2500);
+            if (sessionError || !user) {
+                    window.location.href= "/login";
                 return;
             }
 
@@ -29,17 +28,17 @@ export default function useVerificaAcessoAdmin() {
             
             if (perfil) {
                 setCargo(perfil.cargo);
-            }
-            setCarregando(false);
-
-            if (error){
-                console.error("Erro ao carregar perfil:", error);
-            }
 
             if (perfil?.cargo !== 'administrador') {
-                setTimeout(() => {
-                    router.push("/");
-                  }, 2500);
+                        window.location.href= "/";
+                }
+            }
+
+        } catch (error){
+                console.error("Erro ao carregar perfil:", error);
+                window.location.href= "/";
+        } finally {
+            setCarregando(false);
             }
         };
 
