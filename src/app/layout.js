@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
 
         <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" />
       </head>
-      <body style={{ fontFamily: "'Manrope', sans-serif" }}>
+      <body style={{ fontFamily: "'Manrope', sans-serif" }} className='custom-scrollbar'>
         <NavbarWrapper />
         {children}
       </body>
