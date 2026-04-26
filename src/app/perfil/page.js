@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Toaster, toast } from "react-hot-toast";
 import { supabase } from "../../lib/supabaseClient";
 import Footer from "../../components/layout/Footer";
+import Navbar from '../../components/layout/Navbar';
 import {
   ChevronRightIcon,
   EnvelopeIcon,
@@ -98,6 +99,7 @@ export default function PerfilPage() {
 
   return (
     <div className="min-h-screen bg-[#eef5ee] flex flex-col text-[#264f41] relative overflow-hidden">
+      <Navbar />
       <Toaster position="top-right" />
 
       <main className="flex-1 relative overflow-hidden">

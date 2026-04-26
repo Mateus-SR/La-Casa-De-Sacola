@@ -619,7 +619,7 @@ export default function Painel() {
                         </span>
                       </td>
                       <td className="p-4 text-center">
-                        <button onClick={() => handleAbrirEdicao(sacola)} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition inline-flex items-center gap-1 font-bold">
+                        <button onClick={() => handleAbrirEdicao(sacola)} className="text-blue-600 hover:bg-white p-2 rounded-lg transition inline-flex items-center gap-1 font-bold">
                           <Pencil2Icon/> Editar
                         </button>
                       </td>
