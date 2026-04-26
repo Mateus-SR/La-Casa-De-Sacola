@@ -11,16 +11,17 @@ import styles from "../components/auth/auth.module.css";
 import { Toaster } from "react-hot-toast";
 import useLoginHook from "../hooks/loginHook.js";
 import { useRouter } from "next/navigation";
+import { supabase } from "../lib/supabaseClient";
+import useRecuperacaoHook from "../hooks/recuperacaoHook";
 
+export default function RecuperacaoSenha() {
+  const { email, setEmail, enviado, loading, handleEnviarEmail } =
+    useRecuperacaoHook();
 
-export default function PasswordRecovery() {
-
-    const { formData, setFormData, loading, handleSignIn } = useLoginHook();
-    const router = useRouter();
+  const router = useRouter();
 
   return (
     <>
-
       <Toaster position="top-right" />
       <meta charSet="UTF-8" />
       <title>Recuperação de Senha</title>
@@ -50,13 +51,13 @@ export default function PasswordRecovery() {
             </svg>
             Voltar
           </button>
-          
+
           <h1
             className={`${styles.reveal} ${styles.d1} ${styles.title} font-extrabold`}
           >
-            Nova Senha
+            Recuperação de Senha
           </h1>
-          
+
           <p
             className={`${styles.reveal} ${styles.d2} ${styles.titleSub} mt-2`}
           >
@@ -64,28 +65,27 @@ export default function PasswordRecovery() {
           </p>
 
           <form
-            onSubmit={handleSignIn}
+            onSubmit={handleEnviarEmail}
             className={`${styles.formBlock} mt-8 flex flex-col`}
           >
             <AuthField
               type="email"
               placeholder="Email"
-              revealClass={styles.d2}
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required={true}
             />
 
-          <AuthButton
-            type="submit"
-            disabled={loading}
-          >
-            Enviar Instruções
-          </AuthButton>
-            </form>
-        
+            <AuthButton type="submit" disabled={loading}>
+              {loading ? "Enviando..." : "Enviar Instruções"}
+            </AuthButton>
+          </form>
+
+          {enviado && (
+            <p className="text-center text-[#3ca779] mt-4 text-sm">
+              Email enviado! Verifique sua caixa de entrada.
+            </p>
+          )}
         </AuthCard>
       </AuthBackground>
     </>
