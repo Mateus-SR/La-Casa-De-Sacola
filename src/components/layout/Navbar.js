@@ -32,6 +32,28 @@ export default function Navbar() {
   }, [dropdownOpen])
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      toast.error(
+        (t) => (
+          <span className="flex flex-col gap-2">
+            <span className="font-bold">Opa! Tivemos um problema ao carregar sua conta.</span>
+            <span className="text-sm font-normal">
+              Verifique sua conexão e tente novamente.
+            </span>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-[#5ab58f] hover:bg-[#2e8f65] text-white p-2.5 rounded-xl font-bold transition shadow-lg flex flex-row items-center justify-center gap-2"
+              >
+                <UpdateIcon/>
+                Recarregar
+              </button>
+          </span>
+        ),
+        { duration: Infinity, id: "erro-auth" }
+      );
+      setNavbarLoading(false);
+    }, 5000);
+  
 /*     const getDadosIniciais = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
@@ -50,6 +72,8 @@ export default function Navbar() {
     //getDadosIniciais();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      clearTimeout(timeout);
+      
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
@@ -92,6 +116,7 @@ export default function Navbar() {
     });
 
     return () => {
+      clearTimeout(timeout);
       authListener.subscription.unsubscribe();
     };
   }, []);
