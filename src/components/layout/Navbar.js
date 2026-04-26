@@ -73,18 +73,19 @@ export default function Navbar() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       clearTimeout(timeout);
-      
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        const { data: perfil, error: perfilError } = await supabase
-          .from('usuario')
-          .select('cargo')
-          .eq('uuid_usu', currentUser.id)
-          .single();
-
-        if (perfilError) {
+    
+      try {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+    
+        if (currentUser) {
+          const { data: perfil, error: perfilError } = await supabase
+            .from('usuario')
+            .select('cargo')
+            .eq('uuid_usu', currentUser.id)
+            .single();
+    
+          if (perfilError) {
           console.error('Erro ao buscar cargo:', perfilError)
           toast.error(
             (t) => (
@@ -106,14 +107,19 @@ export default function Navbar() {
           );
           
           return;
-        }
-        setCargo(perfil?.cargo ?? null);
-      } else {
-        setCargo(null);
       }
 
-      setNavbarLoading(false);
-    });
+      setCargo(perfil?.cargo ?? null);
+    } else {
+      setCargo(null);
+    }
+  } catch (e) {
+    console.error('Erro inesperado na verificação:', e);
+    toast.error(toastErroAuth, opcoesErroAuth);
+  } finally {
+    setNavbarLoading(false); // ← sempre executa, independente do que aconteceu acima
+  }
+});
 
     return () => {
       clearTimeout(timeout);
