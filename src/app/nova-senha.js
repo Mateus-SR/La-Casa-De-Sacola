@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -14,6 +14,7 @@ import styles from "../components/auth/auth.module.css";
 export default function NovaSenha() {
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+  const [autorizado, setAutorizado] = useState(false);
   const router = useRouter();
 
   const handleNovaSenha = async (e) => {
@@ -31,6 +32,18 @@ export default function NovaSenha() {
 
     setLoading(false);
   };
+
+  useEffect(() => {
+      const hash = window.location.hash;
+
+      if (hash.includes("type=recovery")) {
+        setAutorizado(true);
+      } else {
+        toast.error("Acesso não autorizado.");
+        router.push("/recuperacao");
+      }
+    }, []);
+    if (!autorizado) return null;
 
   return (
     <AuthBackground>
