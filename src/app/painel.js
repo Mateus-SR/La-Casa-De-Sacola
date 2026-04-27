@@ -4,6 +4,16 @@ import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import useLoginHook from "../hooks/loginHook.js" // precisa trocar pra um que valide se o usuário já está logado (ou então adicionar essa logica dentro do loginHook)
 import RotaAdmin from "../components/admin/rotaAdmin";
+import CoresMaterialSection from "../components/admin/CoresMaterialSection";
+import CoresMaterialPreview from "../components/admin/CoresMaterialPreview";
+import EditarCoresDialog from "../components/admin/EditarCoresDialog";
+import {
+  CORES_PRINCIPAIS_PADRAO,
+  obterCoresDoMaterial,
+  adicionarCorLocal,
+  removerCorLocal,
+  salvarCoresNoBanco,
+} from "../components/admin/coresMaterialLogic";
 // import ErroAcesso from "../components/layout/ErroAcesso";
 // import useVerificaAcessoAdmin from "../hooks/verificaAcesso";
 // Depois preciso "refatorar" o hook e componente relacionado ao acesso administrador, foi erro meu -Mateus
@@ -14,6 +24,44 @@ import * as Checkbox from '@radix-ui/react-checkbox';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { supabase } from "../lib/supabaseClient";
+
+const salvarCorNoBanco = async (nome, hex) => {
+  const { data, error } = await supabase
+    .from('cores')
+    .insert([
+      {
+        nome_cor: nome,
+        hex_cor: hex
+      }
+    ])
+    .select();
+
+  if (error) {
+    console.error("Erro ao salvar cor:", error);
+    alert("Erro ao salvar cor no banco");
+    return null;
+  }
+
+  return data[0];
+};
+
+const excluirCorNoBanco = async (id) => {
+  console.log("Excluindo cor ID:", id);
+
+  const { error } = await supabase
+    .from('cores')
+    .update({ excluido: true })
+    .eq('id_cor', id);
+
+  if (error) {
+    console.error("Erro ao excluir cor:", error);
+    alert("Erro ao excluir cor");
+    return false;
+  }
+
+  return true;
+};
+
 import { 
   Pencil2Icon, 
   CheckCircledIcon, 
@@ -52,24 +100,60 @@ export default function Painel() {
         // Executamos a função
         carregarSacolas();
         carregarFiltros();
+        carregarCores();
     
       }, []); // 👈 Esse colchete vazio é vital! Ele diz ao React: "Rode isso apenas UMA VEZ ao abrir a página."
     
       const carregarFiltros = async () => {
-        const { data: tipo, error: erroMat } = await supabase
-          .from('tipo')
-          .select('id_tip, tipo_tip')
-          .neq('excluido', true);
-        //if (tipo) setOpcoesMaterial(tipo.map(t => t.tipo_tip));
-        if (tipo) setOpcoesMaterial(tipo);
+    // 1. Busca os Materiais
+    const { data: tipo, error: erroMat } = await supabase
+      .from('tipo')
+      .select('id_tip, tipo_tip')
+      .neq('excluido', true);
     
-        const { data: tamanho } = await supabase
-          .from('tamanho')
-          .select('id_tam, tamanho_tam')
-          .neq('excluido', true);
-          //if (tamanho) setOpcoesTamanho(tamanho.map(t => t.tamanho_tam));
-          if (tamanho) setOpcoesTamanho(tamanho);
-        };
+    if (tipo) setOpcoesMaterial(tipo);
+
+    // 2. Busca os Tamanhos
+    const { data: tamanho } = await supabase
+      .from('tamanho')
+      .select('id_tam, tamanho_tam')
+      .neq('excluido', true);
+    
+    if (tamanho) setOpcoesTamanho(tamanho);
+
+    // 3. NOVA LÓGICA: Busca os vínculos de cores já salvos no banco
+    const { data: relacoes, error: erroRel } = await supabase
+      .from('tipo_cor')
+      .select(`
+        id_tip,
+        id_cor,
+        tipo:id_tip ( tipo_tip ),
+        cores:id_cor ( nome_cor, hex_cor )
+      `);
+
+    if (relacoes && !erroRel) {
+      const mapeamentoCores = {};
+
+      relacoes.forEach(rel => {
+        // Normaliza o nome do material para usar como chave (ex: "Plástico" -> "plástico")
+        const chaveMaterial = rel.tipo.tipo_tip.trim().toLowerCase();
+        
+        if (!mapeamentoCores[chaveMaterial]) {
+          mapeamentoCores[chaveMaterial] = [];
+        }
+
+        // Adiciona a cor ao array desse material no estado
+        mapeamentoCores[chaveMaterial].push({
+          id: rel.id_cor,
+          nome: rel.cores.nome_cor,
+          hex: rel.cores.hex_cor
+        });
+      });
+
+      // Atualiza o estado global com o que veio do banco
+      setCoresSelecionadasPorMaterial(mapeamentoCores);
+    }
+  };
     
       const [sacolas, setSacolas] = useState([
         { id_sac: 1, nome_sac: 'Carregando', tipo_sac: 'Carregando', quantidademin_sac: 0, precounitario_sac: 0, tamanho_sac: 'Carregando', peso_sac: 'Carregando', status_sac: 'Carregando' },
@@ -83,6 +167,151 @@ export default function Painel() {
       const [enumAtual, setEnumAtual] = useState("");
       const [novoValorEnum, setNovoValorEnum] = useState("");
       const [enumEditandoId, setEnumEditandoId] = useState(null)
+
+      const [coresPorMaterial, setCoresPorMaterial] = useState({});
+      const [coresPrincipais, setCoresPrincipais] = useState([]);
+      const [coresSelecionadasPorMaterial, setCoresSelecionadasPorMaterial] = useState({});
+      const [novaCorNome, setNovaCorNome] = useState("");
+      const [novaCorHex, setNovaCorHex] = useState("#000000");
+      const [modalEditarCoresAberto, setModalEditarCoresAberto] = useState(false);
+
+      const handleAdicionarCorMaterialLocal = async (nomeMaterial) => {
+        const resultado = adicionarCorLocal({
+          nomeMaterial,
+          novaCorNome,
+          novaCorHex,
+          coresPrincipais,
+          coresPorMaterial,
+        });
+
+        if (!resultado.ok) {
+          if (resultado.mensagem) alert(resultado.mensagem);
+          return;
+        }
+
+       // SALVA NO BANCO
+        const corSalva = await salvarCorNoBanco(novaCorNome, novaCorHex);
+
+        if (!corSalva) return;
+
+        // continua sua lógica normal
+        if (resultado.tipo === "principal") {
+          setCoresPrincipais(resultado.coresPrincipaisAtualizadas);
+        }
+
+        if (resultado.tipo === "material") {
+          setCoresPorMaterial((anterior) => ({
+            ...anterior,
+            [resultado.materialNormalizado]: resultado.coresDoMaterialAtualizadas,
+          }));
+        }
+
+        setNovaCorNome("");
+        setNovaCorHex("#000000");
+      };
+
+      
+      const carregarCores = async () => {
+        const { data, error } = await supabase
+          .from('cores')
+          .select('*')
+          .or('excluido.is.null,excluido.eq.false');
+
+        if (error) {
+          console.error("Erro ao buscar cores:", error);
+          return;
+        }
+
+        if (data) {
+          const coresFormatadas = data.map((c) => ({
+            nome: c.nome_cor,
+            hex: c.hex_cor,
+            id: c.id_cor
+          }));
+
+          setCoresPrincipais(coresFormatadas);
+        }
+      };
+
+      const obterChaveSelecaoCor = (nomeMaterial) => {
+        const chave = (nomeMaterial || "").trim().toLowerCase();
+        return chave || "__principal__";
+      };
+
+      const obterCoresSelecionadasDoMaterial = (nomeMaterial) => {
+        const chave = obterChaveSelecaoCor(nomeMaterial);
+        return coresSelecionadasPorMaterial[chave] || [];
+      };
+
+      const obterCoresDisponiveisParaNovaSacola = () => {
+        if (!novaSacola.tipo_sac) {
+          return [];
+        }
+
+        return obterCoresSelecionadasDoMaterial(novaSacola.tipo_sac);
+      };
+
+      const handleToggleSelecaoCor = (nomeMaterial, cor) => {
+        const chave = obterChaveSelecaoCor(nomeMaterial);
+        const coresAtuais = coresSelecionadasPorMaterial[chave] || [];
+        const existe = coresAtuais.some(
+          (selecionada) => selecionada.nome === cor.nome && selecionada.hex === cor.hex
+        );
+
+        setCoresSelecionadasPorMaterial((anterior) => ({
+          ...anterior,
+          [chave]: existe
+            ? coresAtuais.filter(
+                (selecionada) => !(selecionada.nome === cor.nome && selecionada.hex === cor.hex)
+              )
+            : [...coresAtuais, cor],
+        }));
+      };
+
+
+      const handleExcluirCorLocal = async (nomeMaterial, cor) => {
+        const confirmado = window.confirm(`Tem certeza que deseja excluir a cor ${cor.nome}?`);
+
+        if (!confirmado) return;
+
+        //  EXCLUI NO BANCO
+        if (cor.id) {
+          const sucesso = await excluirCorNoBanco(cor.id);
+
+        if (!sucesso) return;
+
+        await carregarCores(); //  ESSENCIAL
+        }
+
+        // continua sua lógica local
+        const resultado = removerCorLocal({
+          nomeMaterial,
+          cor,
+          coresPrincipais,
+          coresPorMaterial,
+          coresSelecionadasPorMaterial,
+        });
+
+        if (!resultado.ok) return;
+
+        setCoresSelecionadasPorMaterial(resultado.coresSelecionadasPorMaterialAtualizadas);
+
+        if (resultado.tipo === "principal") {
+          setCoresPrincipais(resultado.coresPrincipaisAtualizadas);
+        }
+
+        if (resultado.tipo === "material") {
+          setCoresPorMaterial((anterior) => ({
+            ...anterior,
+            [resultado.materialNormalizado]: resultado.coresDoMaterialAtualizadas,
+          }));
+        }
+      };
+
+      const resetFormularioCor = () => {
+        setNovaCorNome("");
+        setNovaCorHex("#000000");
+      };
 
       const [modalAberto, setModalAberto] = useState(false);
 
@@ -173,99 +402,69 @@ export default function Painel() {
         setSacolaEditandoId(null);
       };
     
-      const handleOcultarSacola = async () => {
+     const handleOcultarSacola = async () => {
         const { error } = await supabase
           .from('sacola')
           .update({ status_sac: 'Oculto' })
-          .eq('id_sac', sacolaEditandoId)
-    
-          if (error) {
-            console.error("Erro ao ocultar sacola:", error)
-            // pendente modal de erro aqui
-          } else {
-            setSacolas(sacolas.map((sacola) => 
-              sacola.id_sac === sacolaEditandoId
-              ? {...sacola, status_sac: 'Oculto' }
-              : sacola
-            ));
-          };
-    
-          setModalAberto(false);
-          setSacolaEditandoId(null);
-      }
-    
+          .eq('id_sac', sacolaEditandoId);
+      
+        if (error) {
+          console.error("Erro ao ocultar sacola:", error);
+        } else {
+          setSacolas((prevSacolas) => prevSacolas.map((sacola) => 
+            sacola.id_sac === sacolaEditandoId
+            ? { ...sacola, status_sac: 'Oculto' }
+            : sacola
+          ));
+        }
+      
+        setModalAberto(false);
+        setSacolaEditandoId(null);
+      };
+
       const handleAdicionarValorEnum = async (e) => {
         e.preventDefault();
         e.stopPropagation(); 
     
         if (!novoValorEnum.trim()) return; 
     
-        // Define em qual tabela vamos inserir (materiais ou tamanhos)
         const tabelaAlvo = enumAtual === 'tipo' ? 'tipo' : 'tamanho';
         const nomeColuna = enumAtual === 'tipo' ? 'tipo_tip' : 'tamanho_tam';
         const listaCerta = enumAtual === 'tipo' ? opcoesMaterial : opcoesTamanho;
     
         const jaExiste = listaCerta.some(item => 
-          item[colunaNome].toLowerCase() === novoValorEnum.toLowerCase()
+          item[nomeColuna].toLowerCase() === novoValorEnum.trim().toLowerCase()
         );
       
         if (jaExiste) {
-          // substituir esse alert eventualmente!
           alert(`Erro: Este ${enumAtual === 'tipo' ? 'material' : 'tamanho'} já está cadastrado!`);
-          return; // Para a execução aqui e não envia para o banco
+          return; 
         }
 
-        // Faz um insert padrão na tabela escolhida
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from(tabelaAlvo)
-          .insert([{ [nomeColuna]: novoValorEnum.trim() }]);
+          .insert([{ [nomeColuna]: novoValorEnum.trim() }])
+          .select();
     
         if (error) {
           console.error("Erro ao adicionar na tabela:", error);
-          // pendente modal avisando sobre o erro, se nome ja existe, etc
         } else {
+          if (enumAtual === 'tipo' && data && data.length > 0) {
+            const idNovoMaterial = data[0].id_tip; 
+            const materialChave = novoValorEnum.trim().toLowerCase();
+            const coresParaSalvar = coresSelecionadasPorMaterial[materialChave] || [];
+
+            if (coresParaSalvar.length > 0) {
+              await salvarCoresNoBanco(idNovoMaterial, coresParaSalvar);
+            }
+          }
+          
           await carregarFiltros(); 
           setModalEnumAberto(false);
-          setNovoValorEnum("");      
-        }
-      };
-
-            // 1. Função para editar o nome de um item existente
-      const handleEditarValorEnum = async () => {
-        if (!novoValorEnum.trim() || !enumEditandoId) return;
-      
-        const listaCerta = enumAtual === 'tipo' ? opcoesMaterial : opcoesTamanho;
-        const tabelaAlvo = enumAtual === 'tipo' ? 'tipo' : 'tamanho';
-        const colunaNome = enumAtual === 'tipo' ? 'tipo_tip' : 'tamanho_tam';
-        const colunaId = enumAtual === 'tipo' ? 'id_tip' : 'id_tam';
-      
-        const jaExisteEmOutro = listaCerta.some(item => 
-          item[colunaNome].toLowerCase() === novoValorEnum.toLowerCase() && 
-          item[colunaId] !== enumEditandoId
-        );
-      
-        if (jaExisteEmOutro) {
-          // substituir esse alert eventualmente!
-          alert("Erro: Já existe outro item com este mesmo nome!");
-          return;
-        }
-
-        const { error } = await supabase
-          .from(tabelaAlvo)
-          .update({ [colunaNome]: novoValorEnum.trim() })
-          .eq(colunaId, enumEditandoId); // Usa o ID que guardamos no .find()
-      
-        if (error) {
-          console.error("Erro ao editar:", error);
-        } else {
-          await carregarFiltros(); // Atualiza os dropdowns da tela principal
-          setModalEnumAberto(false);
-          setEnumEditandoId(null);
           setNovoValorEnum("");
         }
       };
 
-      // 2. Função para ocultar (soft delete)
       const handleOcultarEnum = async (idParaOcultar) => {
         const tabelaAlvo = enumAtual === 'tipo' ? 'tipo' : 'tamanho';
         const colunaId = enumAtual === 'tipo' ? 'id_tip' : 'id_tam';
@@ -284,7 +483,38 @@ export default function Painel() {
           setNovoValorEnum("");    
         }
       };
-    
+      
+      const handleEditarValorEnum = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        
+        if (!novoValorEnum.trim() || !enumEditandoId) return;
+
+        const tabelaAlvo = enumAtual === 'tipo' ? 'tipo' : 'tamanho';
+        const nomeColuna = enumAtual === 'tipo' ? 'tipo_tip' : 'tamanho_tam';
+        const idColuna = enumAtual === 'tipo' ? 'id_tip' : 'id_tam';
+
+        const { error } = await supabase
+          .from(tabelaAlvo)
+          .update({ [nomeColuna]: novoValorEnum.trim() })
+          .eq(idColuna, enumEditandoId);
+
+        if (error) {
+          console.error("Erro ao editar na tabela:", error);
+          alert("Erro ao editar o item no banco.");
+        } else {
+          if (enumAtual === 'tipo') {
+            const materialChave = novoValorEnum.trim().toLowerCase();
+            const coresParaSalvar = coresSelecionadasPorMaterial[materialChave] || [];
+            await salvarCoresNoBanco(enumEditandoId, coresParaSalvar);
+          }
+
+          await carregarFiltros();
+          setModalEnumAberto(false);
+          setNovoValorEnum("");
+          setEnumEditandoId(null);
+        }
+      };
+
       const sacolasFiltradas = sacolas.filter((sacola) => {
         if (!sacola) return false;
         if (sacola.status_sac === 'Oculto') {
@@ -304,9 +534,9 @@ export default function Painel() {
           nome_sac: sacolaEscolhida.nome_sac,
           status_sac: sacolaEscolhida.status_sac
         });
-        setSacolaEditandoId(sacolaEscolhida.id_sac); // Avisa qual ID estamos editando
-        setNovaSacola(sacolaEscolhida);          // Preenche o formulário
-        setModalAberto(true);                    // Abre o modal
+        setSacolaEditandoId(sacolaEscolhida.id_sac);
+        setNovaSacola(sacolaEscolhida);
+        setModalAberto(true);
       };
     
       const handleAbrirNovaSacola = () => {
@@ -321,8 +551,9 @@ export default function Painel() {
           peso_sac: '', 
           status_sac: '' 
         });
-        
       };
+
+
 
   return (
     <RotaAdmin>
@@ -427,11 +658,17 @@ export default function Painel() {
                       setEnumAtual('tipo');
                       setEnumEditandoId(null);
                       setNovoValorEnum("");
+                      resetFormularioCor();
                       setModalEnumAberto(true);
                       }}
                       className="p-3 border border-gray-300 rounded-xl hover:bg-gray-50"><GearIcon/></button>
                     
                   </div>
+
+                  <CoresMaterialPreview
+                    show={Boolean(novaSacola.tipo_sac)}
+                    nomesCores={obterCoresDisponiveisParaNovaSacola()}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -508,6 +745,7 @@ export default function Painel() {
       setEnumAtual('tamanho');
       setEnumEditandoId(null);
       setNovoValorEnum("");
+      resetFormularioCor();
       setModalEnumAberto(true);
       }} className="p-3 border border-gray-300 rounded-xl hover:bg-gray-50 cursor-pointer transition">
       <GearIcon/>
@@ -635,7 +873,13 @@ export default function Painel() {
         </div>
 
         {/* Modal para novos valores de filtros (Tamanho/Material) */}
-        <Dialog.Root open={modalEnumAberto} onOpenChange={setModalEnumAberto}>
+        <Dialog.Root
+          open={modalEnumAberto}
+          onOpenChange={(aberto) => {
+            setModalEnumAberto(aberto);
+            if (!aberto) resetFormularioCor();
+          }}
+        >
           <Dialog.Portal>
             <Dialog.Overlay className="bg-black/40 fixed inset-0 z-[120]" />
             <Dialog.Content aria-describedby={undefined} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm z-[130]">
@@ -654,6 +898,7 @@ export default function Painel() {
                     setEnumEditandoId(null);
                     setNovoValorEnum("");
                   }
+                  resetFormularioCor();
                 }}
               >
                 {/* Botões de Navegação das Abas */}
@@ -683,6 +928,15 @@ export default function Painel() {
                       onChange={(e) => setNovoValorEnum(e.target.value)}
                       autoFocus
                     />
+
+                    <CoresMaterialSection
+                      show={enumAtual === 'tipo'}
+                      nomesCores={coresPrincipais}
+                      coresSelecionadas={obterCoresSelecionadasDoMaterial(novoValorEnum)}
+                      onAbrirFormulario={() => setModalEditarCoresAberto(true)}
+                      onToggleCor={(cor) => handleToggleSelecaoCor(novoValorEnum, cor)}
+                    />
+
                     <div className="flex gap-3">
                       <Dialog.Close asChild>
                         <button type="button" className="flex-1 p-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition">Cancelar</button>
@@ -750,6 +1004,14 @@ export default function Painel() {
                         className="border border-gray-300 p-3 rounded-xl outline-none focus:border-[#5ab58f]"
                         value={novoValorEnum}
                         onChange={(e) => setNovoValorEnum(e.target.value)}
+                      />
+
+                      <CoresMaterialSection
+                        show={enumAtual === 'tipo'}
+                        nomesCores={coresPrincipais}
+                        coresSelecionadas={obterCoresSelecionadasDoMaterial(novoValorEnum)}
+                        onAbrirFormulario={() => setModalEditarCoresAberto(true)}
+                        onToggleCor={(cor) => handleToggleSelecaoCor(novoValorEnum, cor)}
                       />
                       
                       <div className="flex gap-3 mt-2">
@@ -823,6 +1085,21 @@ export default function Painel() {
             </Dialog.Content>
           </Dialog.Portal>
         </Dialog.Root>
+
+        <EditarCoresDialog
+          open={modalEditarCoresAberto}
+          onOpenChange={(aberto) => {
+            setModalEditarCoresAberto(aberto);
+            if (!aberto) resetFormularioCor();
+          }}
+          novaCorNome={novaCorNome}
+          novaCorHex={novaCorHex}
+          onNomeChange={setNovaCorNome}
+          onHexChange={setNovaCorHex}
+          onSalvarCor={() => handleAdicionarCorMaterialLocal("")}
+          onExcluirCor={(cor) => handleExcluirCorLocal("", cor)}
+          cores={coresPrincipais}
+        />
       </main>
     </RotaAdmin>
   );
