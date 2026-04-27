@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabaseClient";
 import Footer from "../../components/layout/Footer";
 import toast from "react-hot-toast";
 import * as Dialog from '@radix-ui/react-dialog';
+import Navbar from '../../components/layout/Navbar';
 import { MapPinIcon, PlusIcon, TrashIcon, XMarkIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 export default function EnderecosPage() {
@@ -105,6 +106,7 @@ export default function EnderecosPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f7f5] flex flex-col">
+      <Navbar/>
       
       <main className="flex-1 max-w-4xl mx-auto w-full p-6 lg:p-10">
         <header className="mb-8 flex justify-between items-center">

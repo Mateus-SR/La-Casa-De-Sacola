@@ -11,16 +11,20 @@ import styles from "../components/auth/auth.module.css";
 import { Toaster } from "react-hot-toast";
 import useLoginHook from "../hooks/loginHook.js";
 import { useRouter } from "next/navigation";
+import { supabase } from "../lib/supabaseClient";
+import useRecuperacaoHook from "../hooks/recuperacaoHook";
 
-export default function Login() {
-  const { formData, setFormData, loading, handleSignIn } = useLoginHook();
+export default function RecuperacaoSenha() {
+  const { email, setEmail, enviado, loading, handleEnviarEmail } =
+    useRecuperacaoHook();
+
   const router = useRouter();
 
   return (
     <>
       <Toaster position="top-right" />
       <meta charSet="UTF-8" />
-      <title>Login</title>
+      <title>Recuperação de Senha</title>
 
       <link
         href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Quicksand:wght@500;700&display=swap"
@@ -30,7 +34,7 @@ export default function Login() {
       <AuthBackground>
         <AuthCard>
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/login")}
             className={`${styles.reveal} ${styles.d1} flex items-center gap-2 text-sm font-medium text-[#6b9e8a] hover:text-[#3ca779] transition-colors -ml-2 -mt-2 mb-2`}
           >
             <svg
@@ -51,66 +55,37 @@ export default function Login() {
           <h1
             className={`${styles.reveal} ${styles.d1} ${styles.title} font-extrabold`}
           >
-            Login
+            Recuperação de Senha
           </h1>
+
           <p
             className={`${styles.reveal} ${styles.d2} ${styles.titleSub} mt-2`}
           >
-            Entre e transforme suas sacolas em parte da sua marca
+            Digite seu email para receber as instruções de recuperação de senha
           </p>
 
           <form
-            onSubmit={handleSignIn}
+            onSubmit={handleEnviarEmail}
             className={`${styles.formBlock} mt-8 flex flex-col`}
           >
             <AuthField
               type="email"
               placeholder="Email"
-              revealClass={styles.d2}
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required={true}
             />
 
-            <AuthPasswordField
-              placeholder="Senha"
-              revealClass={styles.d3}
-              value={formData.senha}
-              onChange={(e) =>
-                setFormData({ ...formData, senha: e.target.value })
-              }
-              required
-            />
-            <AuthTextLink
-              href="../recuperacao"
-              alignRight
-              revealClass={`${styles.reveal} ${styles.d4}`}
-            >
-              Esqueci minha senha
-            </AuthTextLink>
-
-            <AuthButton
-              type="submit"
-              revealClass={styles.d5}
-              disabled={loading}
-            >
-              {loading ? "Entrando..." : "Entrar"}
+            <AuthButton type="submit" disabled={loading}>
+              {loading ? "Enviando..." : "Enviar Instruções"}
             </AuthButton>
           </form>
 
-          <p
-            className={`${styles.reveal} ${styles.d5} mt-7 text-center text-[#3f705d]`}
-          >
-            Nao tem conta?{" "}
-            <Link
-              href="/cadastro"
-              className={`${styles.softLink} font-semibold underline-offset-4 hover:underline`}
-            >
-              Criar conta
-            </Link>
-          </p>
+          {enviado && (
+            <p className="text-center text-[#3ca779] mt-4 text-sm">
+              Email enviado! Verifique sua caixa de entrada.
+            </p>
+          )}
         </AuthCard>
       </AuthBackground>
     </>

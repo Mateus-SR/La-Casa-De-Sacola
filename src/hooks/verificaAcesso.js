@@ -8,6 +8,7 @@ export default function useVerificaAcessoAdmin() {
     const router = useRouter();
     const [cargo, setCargo] = useState(null);
     const [carregando, setCarregando] = useState(true);
+    const [erro, setErro] = useState(null);
 
     useEffect(() =>{
         const verificarAcessoAdmin = async () => {
@@ -20,33 +21,36 @@ export default function useVerificaAcessoAdmin() {
                 return;
             }
 
-            const { data: perfil, error } = await supabase
+            const { data: perfil, error: perfilError } = await supabase
                 .from('usuario')
                 .select('cargo')
                 .eq('uuid_usu', user.id)
                 .single();
-            
-            if (perfil) {
-                setCargo(perfil.cargo);
 
+            if (perfilError) {
+                setErro("Não foi possível validar seu acesso.\nVerifique sua conexão e recarregue a página.");
+                return;
+            }
+
+            setCargo(perfil.cargo);
             if (perfil?.cargo !== 'administrador') {
                         window.location.href= "/";
                 }
-            }
+
 
         } catch (error){
-                console.error("Erro ao carregar perfil:", error);
-                window.location.href= "/";
+            setErro("Não foi possível validar seu acesso.\nVerifique sua conexão e recarregue a página.");
         } finally {
             setCarregando(false);
             }
         };
 
         verificarAcessoAdmin();
-    }, [router]);
+    }, []);
 
     return {
         cargo,
-        carregando
+        carregando,
+        erro
     };
 };

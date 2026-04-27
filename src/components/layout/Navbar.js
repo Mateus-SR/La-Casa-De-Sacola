@@ -5,21 +5,26 @@ import { supabase } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { 
   PlusIcon, 
+  UpdateIcon
 } from "@radix-ui/react-icons";
 import { useCart } from "../../context/CartContext";
+import toast,{ Toaster } from "react-hot-toast";
+import useNavbarAuth from "../../hooks/loginAuthNavbar"; 
+import ToastErroAuth, { opcoesErroAuth } from "./loginToastNavbar";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [cargo, setCargo] = useState(null);
+  //const [user, setUser] = useState(null);
+  //const [cargo, setCargo] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  //const [navbarLoading, setNavbarLoading] = useState (true);
   const dropdownRef = useRef(null);
   const router = useRouter();
   const { cartCount } = useCart();
 
   useEffect(() => {
     const handleClickFora = (e) => {
-      if (dropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (dropdownOpen && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false)
       }
     };
@@ -30,44 +35,12 @@ export default function Navbar() {
     };
   }, [dropdownOpen])
 
+  const { user, cargo, navbarLoading, erro } = useNavbarAuth();
   useEffect(() => {
-    const getDadosIniciais = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
-        const { data: perfil } = await supabase
-          .from('usuario')
-          .select('cargo')
-          .eq('uuid_usu', user.id)
-          .single();
-        
-        setCargo(perfil?.cargo || null);
-      }
-    };
-
-    getDadosIniciais();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        const { data: perfil } = await supabase
-          .from('usuario')
-          .select('cargo')
-          .eq('uuid_usu', currentUser.id)
-          .single();
-        setCargo(perfil?.cargo || null);
-      } else {
-        setCargo(null);
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+    if (erro) {
+      toast.error(ToastErroAuth, opcoesErroAuth);
+    }
+  }, [erro]);
 
   const handleLogout = async () => {
     try {
@@ -81,9 +54,12 @@ export default function Navbar() {
     }
   };
 
+
+  
   return (
     <header className="sticky top-0 z-50 bg-[#f4f7f5] shadow-sm border-b border-[#e4f4ed]">
       {/* Top bar */}
+      <Toaster position="top-right" />
       <div className="bg-[#292622] text-white text-xs py-1.5 text-center font-medium tracking-wide">
          Frete grátis para pedidos acima de R$500 &nbsp;|&nbsp; La Casa de Sacola
       </div>
@@ -150,7 +126,10 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-            {!user ? (
+
+            {navbarLoading ? (
+              <div className="w-32 h-9 rounded-xl bg-[#e4f4ed] animate-pulse" />
+            ) : !user ? (
               <>
                 <Link
                   href="/login"
@@ -179,7 +158,10 @@ export default function Navbar() {
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-2 text-sm font-semibold text-[#264f41] bg-white border border-[#e4f4ed] rounded-xl px-4 py-2 hover:bg-[#f0faf5] transition-all"
                 >
-                  <span className="max-w-[150px] truncate font-bold">{user.email}</span>
+                  <span className="max-w-[150px] truncate font-bold">
+                    {/*Alterar futuramente para pegar o nome do usuário ao invés do e-mail. Deixar e-mail como failsafe, caso não consiga o nome por alguma razão -Mateus*/}
+                    {user.email}
+                    </span>
                   <svg className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
@@ -278,16 +260,14 @@ export default function Navbar() {
         <div className="md:hidden bg-white border-t border-[#e4f4ed] px-4 pb-4 pt-2 flex flex-col gap-3">
           <Link href="/#categorias" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Sacolas</Link>
           <Link href="/#sobre" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Quem Somos</Link>
-          {cargo === 'administrador' && (
-            <Link href="/painel" className="text-sm font-bold text-[#8f0000] py-2" onClick={() => setMenuOpen(false)}>Painel Administrador</Link>
-          )}
-          {cargo === 'administrador' && (
-            <Link href="/producao" className="text-sm font-bold text-[#8f0000] py-2" onClick={() => setMenuOpen(false)}>Produção</Link>
-          )}
+          <Link href="/#como-funciona" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Como Funciona</Link>
           <Link href="/#contato" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Contato</Link>
+          <Link href="/catalogo" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Produtos Modelos</Link>
           
           <div className="flex flex-col gap-2 pt-2 border-t border-[#e4f4ed]">
-            {!user ? (
+          {navbarLoading ? (
+              <div className="w-32 h-9 rounded-xl bg-[#e4f4ed] animate-pulse" />
+            ) : !user ? (
               <div className="flex gap-3">
                 <Link href="/login" className="flex-1 text-center text-sm font-semibold text-[#8f0000] border border-[#8f0000] rounded-xl px-4 py-2" onClick={() => setMenuOpen(false)}>Entrar</Link>
                 <Link href="/cadastro" className="flex-1 text-center text-sm font-semibold text-white bg-[#5ab58f] rounded-xl px-4 py-2" onClick={() => setMenuOpen(false)}>Cadastrar-se</Link>
@@ -298,10 +278,45 @@ export default function Navbar() {
             ) : (
               <>
                 <p className="text-xs text-gray-500 px-2">Logado como: <b>{user.email}</b></p>
-                <Link href="/perfil" className="text-sm font-bold text-[#264f41] py-2" onClick={() => setMenuOpen(false)}>Minha Conta</Link>
-                <Link href="/enderecos" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Meus Endereços</Link>
-                <Link href="/pedidos" className="text-sm font-medium text-[#3a5c4e] py-2" onClick={() => setMenuOpen(false)}>Meus Pedidos</Link>
-                <button onClick={handleLogout} className="text-left text-sm font-bold text-red-600 py-2">Sair</button>
+                <Link href="/perfil" onClick={() => setDropdownOpen(false)}>
+                      Minha Conta
+                    </Link>
+                    <div className="h-px bg-[#e4f4ed] mx-4" />
+                      {cargo !== 'administrador' && (
+                        <>
+                          <Link href="/enderecos" className="text-sm font-bold text-[#264f41] py-2" onClick={() => setMenuOpen(false)}>
+                            Meus Endereços
+                          </Link>
+
+                          <Link href="/pedidos" className="text-sm font-bold text-[#264f41] py-2" onClick={() => setMenuOpen(false)}>
+                            Meus Pedidos
+                          </Link>
+
+                          <hr className="my-1 border-[#e4f4ed]" />
+
+                          <Link href="/perfil" className="text-sm font-bold text-[#264f41] py-2" onClick={() => setMenuOpen(false)}>
+                          <div className="flex flex-row items-center">
+                            <PlusIcon className="size-4 mr-1"></PlusIcon> Fazer Pedido
+                          </div>
+                          </Link>
+                        </>
+                      )}
+                    {cargo === 'administrador' && (
+                      <>
+                      <Link href="/painel" className="text-sm font-bold text-[#8f0000] py-2" onClick={() => setMenuOpen(false)}>
+                        Painel Administrador
+                      </Link>
+
+                      <Link href="/producao" className="text-sm font-bold text-[#8f0000] py-2" onClick={() => setMenuOpen(false)}>
+                        Sacolas em Produção
+                      </Link>
+                      </>
+                    )}
+                <button
+                  onClick={handleLogout}
+                  className="text-left text-sm font-bold text-red-600 py-2">
+                    Sair
+                </button>
               </>
             )}
           </div>

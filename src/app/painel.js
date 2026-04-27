@@ -4,6 +4,9 @@ import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import useLoginHook from "../hooks/loginHook.js" // precisa trocar pra um que valide se o usuário já está logado (ou então adicionar essa logica dentro do loginHook)
 import RotaAdmin from "../components/admin/rotaAdmin";
+// import ErroAcesso from "../components/layout/ErroAcesso";
+// import useVerificaAcessoAdmin from "../hooks/verificaAcesso";
+// Depois preciso "refatorar" o hook e componente relacionado ao acesso administrador, foi erro meu -Mateus
 import { useState, useEffect } from "react";
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
@@ -619,7 +622,7 @@ export default function Painel() {
                         </span>
                       </td>
                       <td className="p-4 text-center">
-                        <button onClick={() => handleAbrirEdicao(sacola)} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition inline-flex items-center gap-1 font-bold">
+                        <button onClick={() => handleAbrirEdicao(sacola)} className="text-blue-600 hover:bg-white p-2 rounded-lg transition inline-flex items-center gap-1 font-bold">
                           <Pencil2Icon/> Editar
                         </button>
                       </td>

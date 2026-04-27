@@ -44,6 +44,7 @@ export default function useLoginHook() {
   
       if (authError) {
         toast.error(getMensagemErroLogin(authError));
+        setLoading(false);
         return;
       }
 

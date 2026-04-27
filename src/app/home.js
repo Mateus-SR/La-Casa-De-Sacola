@@ -25,10 +25,10 @@ export default function HomePage() {
         <Navbar />
         <Hero />
         <Benefits />
-        <BagCategories />
-        <MockupGenerator />
         <HowItWorks />
         <AboutSection />
+        {/* <BagCategories /> */}
+        <MockupGenerator />
         <Reviews />
         <CTABanner />
         <Footer />
