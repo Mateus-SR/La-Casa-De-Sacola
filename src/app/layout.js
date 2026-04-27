@@ -1,4 +1,5 @@
 import './globals.css';
+import { CartProvider } from '../context/CartContext';
 
 export const metadata = {
   title: 'La Casa de Sacola — Sacolas Personalizadas',
@@ -17,7 +18,9 @@ export default function RootLayout({ children }) {
         <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" />
       </head>
       <body style={{ fontFamily: "'Manrope', sans-serif" }} className='custom-scrollbar'>
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

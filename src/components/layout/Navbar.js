@@ -7,6 +7,7 @@ import {
   PlusIcon, 
   UpdateIcon
 } from "@radix-ui/react-icons";
+import { useCart } from "../../context/CartContext";
 import toast,{ Toaster } from "react-hot-toast";
 import useNavbarAuth from "../../hooks/loginAuthNavbar"; 
 import ToastErroAuth, { opcoesErroAuth } from "./loginToastNavbar";
@@ -19,6 +20,7 @@ export default function Navbar() {
   //const [navbarLoading, setNavbarLoading] = useState (true);
   const dropdownRef = useRef(null);
   const router = useRouter();
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const handleClickFora = (e) => {
@@ -101,6 +103,30 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            {/* Ícone de Carrinho */}
+            <Link href="/carrinho" className="relative p-2 text-[#264f41] hover:bg-[#f0faf5] rounded-xl transition-all group">
+              <svg 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className="group-hover:scale-110 transition-transform"
+              >
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#8f0000] text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1 shadow-sm animate-in zoom-in duration-300">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
             {navbarLoading ? (
               <div className="w-32 h-9 rounded-xl bg-[#e4f4ed] animate-pulse" />
             ) : !user ? (
@@ -195,11 +221,26 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-lg text-[#264f41] hover:bg-[#f0faf5]"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Menu"
-          >
+          <div className="flex items-center gap-2 md:hidden">
+            {/* Carrinho Mobile */}
+            <Link href="/carrinho" className="relative p-2 text-[#264f41]">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-[#8f0000] text-white text-[9px] font-bold min-w-[16px] h-[16px] flex items-center justify-center rounded-full px-1">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            
+            <button
+              className="p-2 rounded-lg text-[#264f41] hover:bg-[#f0faf5]"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Menu"
+            >
             {menuOpen ? (
               <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -210,6 +251,7 @@ export default function Navbar() {
               </svg>
             )}
           </button>
+          </div>
         </div>
       </div>
 

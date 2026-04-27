@@ -8,6 +8,7 @@ import CTABanner from "../components/home/CTABanner";
 import Navbar from '../components/layout/Navbar';
 import Footer from "../components/layout/Footer";
 import MockupGenerator from "../components/home/MockupGenerator";
+import { Toaster } from "react-hot-toast";
 
 export default function HomePage() {
   return (
@@ -20,6 +21,7 @@ export default function HomePage() {
         rel="stylesheet"
       />
       <div className="min-h-screen bg-white">
+        <Toaster position="bottom-right" />
         <Navbar />
         <Hero />
         <Benefits />
