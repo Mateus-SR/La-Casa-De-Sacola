@@ -1,3 +1,5 @@
+// Apenas exibe visualmente as cores já selecionadas para o material atual)
+
 "use client";
 
 export default function CoresMaterialPreview({ show, nomesCores }) {

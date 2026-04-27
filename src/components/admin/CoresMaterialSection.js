@@ -1,3 +1,5 @@
+// Renderiza a lista de cores disponíveis para um material, permitindo selecionar e editar as cores
+
 "use client";
 
 export default function CoresMaterialSection({

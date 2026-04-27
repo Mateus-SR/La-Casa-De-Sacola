@@ -1,3 +1,6 @@
+//Lógica Pura
+
+// Lista de cores principais padrão
 export const CORES_PRINCIPAIS_PADRAO = [
   { nome: "Preto", hex: "#000000" },
   { nome: "Branco", hex: "#ffffff" },
@@ -7,16 +10,20 @@ export const CORES_PRINCIPAIS_PADRAO = [
   { nome: "Amarelo", hex: "#eab308" },
 ];
 
+// Garantir consistência nas chaves do objeto
 export function normalizarMaterial(valor) {
   return (valor || "").trim().toLowerCase();
 }
 
+
+// Obtém as cores para um material específico, usando as cores principais como fallback
 export function obterCoresDoMaterial({ nomeMaterial, coresPorMaterial, coresPrincipais }) {
   const chave = normalizarMaterial(nomeMaterial);
   const cadastradas = coresPorMaterial[chave] || [];
   return cadastradas.length > 0 ? cadastradas : coresPrincipais;
 }
 
+// Adiciona uma nova cor, validando se já existe na lista principal
 export function adicionarCorLocal({
   nomeMaterial,
   novaCorNome,
@@ -68,6 +75,8 @@ export function adicionarCorLocal({
   };
 }
 
+
+// Remove uma cor e também remove de todas as seleções salvas
 export function removerCorLocal({
   nomeMaterial,
   cor,

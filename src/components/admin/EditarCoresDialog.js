@@ -1,3 +1,5 @@
+// Basicamente aqui podemos digitar o nome da cor, escolher hex no input color, salvar, listar e excluir cor individualmente
+
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
