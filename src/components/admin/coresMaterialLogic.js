@@ -1,4 +1,5 @@
 //Lógica Pura
+import { supabase } from '../../lib/supabaseClient'; // Ajuste o caminho se necessário
 
 // Lista de cores principais padrão
 export const CORES_PRINCIPAIS_PADRAO = [
@@ -129,4 +130,37 @@ export function removerCorLocal({
     coresDoMaterialAtualizadas: coresParaFiltrar(coresDoMaterialAtuais),
     coresSelecionadasPorMaterialAtualizadas: removerDasSelecoes(coresSelecionadasPorMaterial),
   };
+}
+
+// Adicione esta nova função para salvar as relações no banco:
+export async function salvarCoresNoBanco(idTipoMaterial, arrayDeCoresSelecionadas) {
+  try {
+    // 1. Limpa as cores antigas vinculadas a este material
+    const { error: errorDelete } = await supabase
+      .from('tipo_cor')
+      .delete()
+      .eq('id_tip', idTipoMaterial);
+
+    if (errorDelete) throw errorDelete;
+
+    // 2. Se houver cores selecionadas, insere as novas
+    if (arrayDeCoresSelecionadas.length > 0) {
+      const novasRelacoes = arrayDeCoresSelecionadas.map((cor) => ({
+        id_tip: idTipoMaterial,
+        id_cor: cor.id // Importante: seu estado local precisa armazenar o id_cor que vem do banco
+      }));
+
+      const { error: errorInsert } = await supabase
+        .from('tipo_cor')
+        .insert(novasRelacoes);
+        
+      if (errorInsert) throw errorInsert;
+    }
+
+    return { ok: true };
+  } catch (error) {
+    // Melhoramos o log para forçar a exibição da mensagem de erro real do Supabase
+    console.error("Erro ao persistir cores:", err.message || JSON.stringify(err));
+    return { ok: false, error: err };
+  }
 }

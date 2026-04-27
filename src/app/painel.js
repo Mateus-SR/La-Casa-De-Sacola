@@ -12,6 +12,7 @@ import {
   obterCoresDoMaterial,
   adicionarCorLocal,
   removerCorLocal,
+  salvarCoresNoBanco,
 } from "../components/admin/coresMaterialLogic";
 import { useState, useEffect } from "react";
 import * as Dialog from '@radix-ui/react-dialog';
@@ -101,20 +102,55 @@ export default function Painel() {
       }, []); // 👈 Esse colchete vazio é vital! Ele diz ao React: "Rode isso apenas UMA VEZ ao abrir a página."
     
       const carregarFiltros = async () => {
-        const { data: tipo, error: erroMat } = await supabase
-          .from('tipo')
-          .select('id_tip, tipo_tip')
-          .neq('excluido', true);
-        //if (tipo) setOpcoesMaterial(tipo.map(t => t.tipo_tip));
-        if (tipo) setOpcoesMaterial(tipo);
+    // 1. Busca os Materiais
+    const { data: tipo, error: erroMat } = await supabase
+      .from('tipo')
+      .select('id_tip, tipo_tip')
+      .neq('excluido', true);
     
-        const { data: tamanho } = await supabase
-          .from('tamanho')
-          .select('id_tam, tamanho_tam')
-          .neq('excluido', true);
-          //if (tamanho) setOpcoesTamanho(tamanho.map(t => t.tamanho_tam));
-          if (tamanho) setOpcoesTamanho(tamanho);
-        };
+    if (tipo) setOpcoesMaterial(tipo);
+
+    // 2. Busca os Tamanhos
+    const { data: tamanho } = await supabase
+      .from('tamanho')
+      .select('id_tam, tamanho_tam')
+      .neq('excluido', true);
+    
+    if (tamanho) setOpcoesTamanho(tamanho);
+
+    // 3. NOVA LÓGICA: Busca os vínculos de cores já salvos no banco
+    const { data: relacoes, error: erroRel } = await supabase
+      .from('tipo_cor')
+      .select(`
+        id_tip,
+        id_cor,
+        tipo:id_tip ( tipo_tip ),
+        cores:id_cor ( nome_cor, hex_cor )
+      `);
+
+    if (relacoes && !erroRel) {
+      const mapeamentoCores = {};
+
+      relacoes.forEach(rel => {
+        // Normaliza o nome do material para usar como chave (ex: "Plástico" -> "plástico")
+        const chaveMaterial = rel.tipo.tipo_tip.trim().toLowerCase();
+        
+        if (!mapeamentoCores[chaveMaterial]) {
+          mapeamentoCores[chaveMaterial] = [];
+        }
+
+        // Adiciona a cor ao array desse material no estado
+        mapeamentoCores[chaveMaterial].push({
+          id: rel.id_cor,
+          nome: rel.cores.nome_cor,
+          hex: rel.cores.hex_cor
+        });
+      });
+
+      // Atualiza o estado global com o que veio do banco
+      setCoresSelecionadasPorMaterial(mapeamentoCores);
+    }
+  };
     
       const [sacolas, setSacolas] = useState([
         { id_sac: 1, nome_sac: 'Carregando', tipo_sac: 'Carregando', quantidademin_sac: 0, precounitario_sac: 0, tamanho_sac: 'Carregando', peso_sac: 'Carregando', status_sac: 'Carregando' },
@@ -363,99 +399,69 @@ export default function Painel() {
         setSacolaEditandoId(null);
       };
     
-      const handleOcultarSacola = async () => {
+     const handleOcultarSacola = async () => {
         const { error } = await supabase
           .from('sacola')
           .update({ status_sac: 'Oculto' })
-          .eq('id_sac', sacolaEditandoId)
-    
-          if (error) {
-            console.error("Erro ao ocultar sacola:", error)
-            // pendente modal de erro aqui
-          } else {
-            setSacolas(sacolas.map((sacola) => 
-              sacola.id_sac === sacolaEditandoId
-              ? {...sacola, status_sac: 'Oculto' }
-              : sacola
-            ));
-          };
-    
-          setModalAberto(false);
-          setSacolaEditandoId(null);
-      }
-    
+          .eq('id_sac', sacolaEditandoId);
+      
+        if (error) {
+          console.error("Erro ao ocultar sacola:", error);
+        } else {
+          setSacolas((prevSacolas) => prevSacolas.map((sacola) => 
+            sacola.id_sac === sacolaEditandoId
+            ? { ...sacola, status_sac: 'Oculto' }
+            : sacola
+          ));
+        }
+      
+        setModalAberto(false);
+        setSacolaEditandoId(null);
+      };
+
       const handleAdicionarValorEnum = async (e) => {
         e.preventDefault();
         e.stopPropagation(); 
     
         if (!novoValorEnum.trim()) return; 
     
-        // Define em qual tabela vamos inserir (materiais ou tamanhos)
         const tabelaAlvo = enumAtual === 'tipo' ? 'tipo' : 'tamanho';
         const nomeColuna = enumAtual === 'tipo' ? 'tipo_tip' : 'tamanho_tam';
         const listaCerta = enumAtual === 'tipo' ? opcoesMaterial : opcoesTamanho;
     
         const jaExiste = listaCerta.some(item => 
-          item[colunaNome].toLowerCase() === novoValorEnum.toLowerCase()
+          item[nomeColuna].toLowerCase() === novoValorEnum.trim().toLowerCase()
         );
       
         if (jaExiste) {
-          // substituir esse alert eventualmente!
           alert(`Erro: Este ${enumAtual === 'tipo' ? 'material' : 'tamanho'} já está cadastrado!`);
-          return; // Para a execução aqui e não envia para o banco
+          return; 
         }
 
-        // Faz um insert padrão na tabela escolhida
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from(tabelaAlvo)
-          .insert([{ [nomeColuna]: novoValorEnum.trim() }]);
+          .insert([{ [nomeColuna]: novoValorEnum.trim() }])
+          .select();
     
         if (error) {
           console.error("Erro ao adicionar na tabela:", error);
-          // pendente modal avisando sobre o erro, se nome ja existe, etc
         } else {
+          if (enumAtual === 'tipo' && data && data.length > 0) {
+            const idNovoMaterial = data[0].id_tip; 
+            const materialChave = novoValorEnum.trim().toLowerCase();
+            const coresParaSalvar = coresSelecionadasPorMaterial[materialChave] || [];
+
+            if (coresParaSalvar.length > 0) {
+              await salvarCoresNoBanco(idNovoMaterial, coresParaSalvar);
+            }
+          }
+          
           await carregarFiltros(); 
           setModalEnumAberto(false);
-          setNovoValorEnum("");      
-        }
-      };
-
-            // 1. Função para editar o nome de um item existente
-      const handleEditarValorEnum = async () => {
-        if (!novoValorEnum.trim() || !enumEditandoId) return;
-      
-        const listaCerta = enumAtual === 'tipo' ? opcoesMaterial : opcoesTamanho;
-        const tabelaAlvo = enumAtual === 'tipo' ? 'tipo' : 'tamanho';
-        const colunaNome = enumAtual === 'tipo' ? 'tipo_tip' : 'tamanho_tam';
-        const colunaId = enumAtual === 'tipo' ? 'id_tip' : 'id_tam';
-      
-        const jaExisteEmOutro = listaCerta.some(item => 
-          item[colunaNome].toLowerCase() === novoValorEnum.toLowerCase() && 
-          item[colunaId] !== enumEditandoId
-        );
-      
-        if (jaExisteEmOutro) {
-          // substituir esse alert eventualmente!
-          alert("Erro: Já existe outro item com este mesmo nome!");
-          return;
-        }
-
-        const { error } = await supabase
-          .from(tabelaAlvo)
-          .update({ [colunaNome]: novoValorEnum.trim() })
-          .eq(colunaId, enumEditandoId); // Usa o ID que guardamos no .find()
-      
-        if (error) {
-          console.error("Erro ao editar:", error);
-        } else {
-          await carregarFiltros(); // Atualiza os dropdowns da tela principal
-          setModalEnumAberto(false);
-          setEnumEditandoId(null);
           setNovoValorEnum("");
         }
       };
 
-      // 2. Função para ocultar (soft delete)
       const handleOcultarEnum = async (idParaOcultar) => {
         const tabelaAlvo = enumAtual === 'tipo' ? 'tipo' : 'tamanho';
         const colunaId = enumAtual === 'tipo' ? 'id_tip' : 'id_tam';
@@ -474,7 +480,38 @@ export default function Painel() {
           setNovoValorEnum("");    
         }
       };
-    
+      
+      const handleEditarValorEnum = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        
+        if (!novoValorEnum.trim() || !enumEditandoId) return;
+
+        const tabelaAlvo = enumAtual === 'tipo' ? 'tipo' : 'tamanho';
+        const nomeColuna = enumAtual === 'tipo' ? 'tipo_tip' : 'tamanho_tam';
+        const idColuna = enumAtual === 'tipo' ? 'id_tip' : 'id_tam';
+
+        const { error } = await supabase
+          .from(tabelaAlvo)
+          .update({ [nomeColuna]: novoValorEnum.trim() })
+          .eq(idColuna, enumEditandoId);
+
+        if (error) {
+          console.error("Erro ao editar na tabela:", error);
+          alert("Erro ao editar o item no banco.");
+        } else {
+          if (enumAtual === 'tipo') {
+            const materialChave = novoValorEnum.trim().toLowerCase();
+            const coresParaSalvar = coresSelecionadasPorMaterial[materialChave] || [];
+            await salvarCoresNoBanco(enumEditandoId, coresParaSalvar);
+          }
+
+          await carregarFiltros();
+          setModalEnumAberto(false);
+          setNovoValorEnum("");
+          setEnumEditandoId(null);
+        }
+      };
+
       const sacolasFiltradas = sacolas.filter((sacola) => {
         if (!sacola) return false;
         if (sacola.status_sac === 'Oculto') {
@@ -494,9 +531,9 @@ export default function Painel() {
           nome_sac: sacolaEscolhida.nome_sac,
           status_sac: sacolaEscolhida.status_sac
         });
-        setSacolaEditandoId(sacolaEscolhida.id_sac); // Avisa qual ID estamos editando
-        setNovaSacola(sacolaEscolhida);          // Preenche o formulário
-        setModalAberto(true);                    // Abre o modal
+        setSacolaEditandoId(sacolaEscolhida.id_sac);
+        setNovaSacola(sacolaEscolhida);
+        setModalAberto(true);
       };
     
       const handleAbrirNovaSacola = () => {
@@ -511,8 +548,9 @@ export default function Painel() {
           peso_sac: '', 
           status_sac: '' 
         });
-        
       };
+
+
 
   return (
     <RotaAdmin>
