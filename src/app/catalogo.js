@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { ChevronLeftIcon, ChevronRightIcon, MixerHorizontalIcon, Cross2Icon } from "@radix-ui/react-icons";
 import Navbar from '../components/layout/Navbar';
+import { useCart } from "../context/CartContext";
+import { toast, Toaster } from "react-hot-toast";
 
 export default function ProdutosModelos() {
   const [produtos, setProdutos] = useState([]);
@@ -13,6 +15,7 @@ export default function ProdutosModelos() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
   const itensPorPagina = 9;
+  const { addToCart } = useCart();
 
   // Filtros
   const [filtroTamanho, setFiltroTamanho] = useState("");
@@ -109,6 +112,7 @@ const carregarProdutos = async () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      <Toaster position="bottom-right" />
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
@@ -241,8 +245,27 @@ const carregarProdutos = async () => {
                         R$ {Number(produto.precounitario_sac).toFixed(2)}
                       </span>
                     </div>
-                    <button className="bg-[#3ca779] hover:bg-[#2e8f65] text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-[#3ca779]/30 hover:shadow-[#3ca779]/50 active:scale-95">
-                      Ver detalhes
+                    <button 
+                      onClick={() => {
+                        addToCart(produto);
+                        toast.success(`${produto.nome_sac} adicionado ao carrinho!`, {
+                          style: {
+                            borderRadius: '16px',
+                            background: '#264f41',
+                            color: '#fff',
+                            fontFamily: 'Quicksand, sans-serif',
+                            fontWeight: 'bold'
+                          },
+                        });
+                      }}
+                      className="bg-[#3ca779] hover:bg-[#2e8f65] text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-[#3ca779]/30 hover:shadow-[#3ca779]/50 active:scale-95 flex items-center gap-2"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                      </svg>
+                      Adicionar
                     </button>
                   </div>
                 </div>
