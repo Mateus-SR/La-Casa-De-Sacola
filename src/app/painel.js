@@ -20,6 +20,44 @@ import * as Checkbox from '@radix-ui/react-checkbox';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { supabase } from "../lib/supabaseClient";
+
+const salvarCorNoBanco = async (nome, hex) => {
+  const { data, error } = await supabase
+    .from('cores')
+    .insert([
+      {
+        nome_cor: nome,
+        hex_cor: hex
+      }
+    ])
+    .select();
+
+  if (error) {
+    console.error("Erro ao salvar cor:", error);
+    alert("Erro ao salvar cor no banco");
+    return null;
+  }
+
+  return data[0];
+};
+
+const excluirCorNoBanco = async (id) => {
+  console.log("Excluindo cor ID:", id);
+
+  const { error } = await supabase
+    .from('cores')
+    .update({ excluido: true })
+    .eq('id_cor', id);
+
+  if (error) {
+    console.error("Erro ao excluir cor:", error);
+    alert("Erro ao excluir cor");
+    return false;
+  }
+
+  return true;
+};
+
 import { 
   Pencil2Icon, 
   CheckCircledIcon, 
@@ -58,6 +96,7 @@ export default function Painel() {
         // Executamos a função
         carregarSacolas();
         carregarFiltros();
+        carregarCores();
     
       }, []); // 👈 Esse colchete vazio é vital! Ele diz ao React: "Rode isso apenas UMA VEZ ao abrir a página."
     
@@ -91,13 +130,13 @@ export default function Painel() {
       const [enumEditandoId, setEnumEditandoId] = useState(null)
 
       const [coresPorMaterial, setCoresPorMaterial] = useState({});
-      const [coresPrincipais, setCoresPrincipais] = useState(CORES_PRINCIPAIS_PADRAO);
+      const [coresPrincipais, setCoresPrincipais] = useState([]);
       const [coresSelecionadasPorMaterial, setCoresSelecionadasPorMaterial] = useState({});
       const [novaCorNome, setNovaCorNome] = useState("");
       const [novaCorHex, setNovaCorHex] = useState("#000000");
       const [modalEditarCoresAberto, setModalEditarCoresAberto] = useState(false);
 
-      const handleAdicionarCorMaterialLocal = (nomeMaterial) => {
+      const handleAdicionarCorMaterialLocal = async (nomeMaterial) => {
         const resultado = adicionarCorLocal({
           nomeMaterial,
           novaCorNome,
@@ -111,6 +150,12 @@ export default function Painel() {
           return;
         }
 
+       // SALVA NO BANCO
+        const corSalva = await salvarCorNoBanco(novaCorNome, novaCorHex);
+
+        if (!corSalva) return;
+
+        // continua sua lógica normal
         if (resultado.tipo === "principal") {
           setCoresPrincipais(resultado.coresPrincipaisAtualizadas);
         }
@@ -124,6 +169,29 @@ export default function Painel() {
 
         setNovaCorNome("");
         setNovaCorHex("#000000");
+      };
+
+      
+      const carregarCores = async () => {
+        const { data, error } = await supabase
+          .from('cores')
+          .select('*')
+          .or('excluido.is.null,excluido.eq.false');
+
+        if (error) {
+          console.error("Erro ao buscar cores:", error);
+          return;
+        }
+
+        if (data) {
+          const coresFormatadas = data.map((c) => ({
+            nome: c.nome_cor,
+            hex: c.hex_cor,
+            id: c.id_cor
+          }));
+
+          setCoresPrincipais(coresFormatadas);
+        }
       };
 
       const obterChaveSelecaoCor = (nomeMaterial) => {
@@ -162,13 +230,21 @@ export default function Painel() {
       };
 
 
-      const handleExcluirCorLocal = (nomeMaterial, cor) => {
+      const handleExcluirCorLocal = async (nomeMaterial, cor) => {
         const confirmado = window.confirm(`Tem certeza que deseja excluir a cor ${cor.nome}?`);
 
-        if (!confirmado) {
-          return;
+        if (!confirmado) return;
+
+        //  EXCLUI NO BANCO
+        if (cor.id) {
+          const sucesso = await excluirCorNoBanco(cor.id);
+
+        if (!sucesso) return;
+
+        await carregarCores(); //  ESSENCIAL
         }
 
+        // continua sua lógica local
         const resultado = removerCorLocal({
           nomeMaterial,
           cor,
@@ -177,9 +253,7 @@ export default function Painel() {
           coresSelecionadasPorMaterial,
         });
 
-        if (!resultado.ok) {
-          return;
-        }
+        if (!resultado.ok) return;
 
         setCoresSelecionadasPorMaterial(resultado.coresSelecionadasPorMaterialAtualizadas);
 
@@ -194,6 +268,7 @@ export default function Painel() {
           }));
         }
       };
+
       const resetFormularioCor = () => {
         setNovaCorNome("");
         setNovaCorHex("#000000");
