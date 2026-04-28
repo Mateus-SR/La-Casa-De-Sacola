@@ -130,7 +130,8 @@ export default function Painel() {
         id_cor,
         tipo:id_tip ( tipo_tip ),
         cores:id_cor ( nome_cor, hex_cor )
-      `);
+      `)
+      .eq('cores.excluido', false)
 
     if (relacoes && !erroRel) {
       const mapeamentoCores = {};
@@ -143,6 +144,7 @@ export default function Painel() {
           mapeamentoCores[chaveMaterial] = [];
         }
 
+        if (!rel.cores) return; // IGNORA COR INVÁLIDA
         // Adiciona a cor ao array desse material no estado
         mapeamentoCores[chaveMaterial].push({
           id: rel.id_cor,
@@ -197,7 +199,14 @@ export default function Painel() {
 
         // continua sua lógica normal
         if (resultado.tipo === "principal") {
-          setCoresPrincipais(resultado.coresPrincipaisAtualizadas);
+          setCoresPrincipais((prev) => [
+            ...prev,
+            {
+              id: corSalva.id_cor,
+              nome: corSalva.nome_cor,
+              hex: corSalva.hex_cor
+            }
+          ]);
         }
 
         if (resultado.tipo === "material") {
@@ -256,7 +265,7 @@ export default function Painel() {
         const chave = obterChaveSelecaoCor(nomeMaterial);
         const coresAtuais = coresSelecionadasPorMaterial[chave] || [];
         const existe = coresAtuais.some(
-          (selecionada) => selecionada.nome === cor.nome && selecionada.hex === cor.hex
+          (selecionada) => selecionada.id === cor.id
         );
 
         setCoresSelecionadasPorMaterial((anterior) => ({
@@ -277,7 +286,18 @@ export default function Painel() {
 
         if (!sucesso) return;
 
-        await carregarCores(); //  ESSENCIAL
+        await carregarCores();
+        await carregarFiltros();
+
+        setCoresSelecionadasPorMaterial((prev) => {
+          const novo = {};
+
+          Object.keys(prev).forEach((material) => {
+            novo[material] = prev[material].filter(c => c.id !== cor.id);
+          });
+
+          return novo;
+      }); //  ESSENCIAL
         }
 
         // continua sua lógica local
