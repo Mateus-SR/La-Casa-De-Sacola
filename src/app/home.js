@@ -25,8 +25,8 @@ export default function HomePage() {
         <Navbar />
         <Hero />
         <Benefits />
-        <HowItWorks />
         <AboutSection />
+        <HowItWorks />
         {/* <BagCategories /> */}
         <MockupGenerator />
         <Reviews />

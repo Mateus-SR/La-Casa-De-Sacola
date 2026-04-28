@@ -7,6 +7,7 @@ import RotaAdmin from "../components/admin/rotaAdmin";
 import CoresMaterialSection from "../components/admin/CoresMaterialSection";
 import CoresMaterialPreview from "../components/admin/CoresMaterialPreview";
 import EditarCoresDialog from "../components/admin/EditarCoresDialog";
+import PainelToast from "../components/admin/PainelToast";
 import {
   CORES_PRINCIPAIS_PADRAO,
   obterCoresDoMaterial,
@@ -39,7 +40,13 @@ const salvarCorNoBanco = async (nome, hex) => {
 
   if (error) {
     console.error("Erro ao salvar cor:", error);
-    alert("Erro ao salvar cor no banco");
+    toast.custom(() => (
+      <PainelToast
+        variant="error"
+        title="Não foi possível salvar a cor"
+        description="Tente novamente em instantes."
+      />
+    ));
     return null;
   }
 
@@ -56,7 +63,13 @@ const excluirCorNoBanco = async (id) => {
 
   if (error) {
     console.error("Erro ao excluir cor:", error);
-    alert("Erro ao excluir cor");
+    toast.custom(() => (
+      <PainelToast
+        variant="error"
+        title="Não foi possível excluir a cor"
+        description="Tente novamente em instantes."
+      />
+    ));
     return false;
   }
 
@@ -78,6 +91,12 @@ import {
 export default function Painel() {
 
   const router = useRouter();
+
+  const toastPainel = (variant, title, description) => {
+    toast.custom(() => (
+      <PainelToast variant={variant} title={title} description={description} />
+    ));
+  };
 
     useEffect(() => {
         // Criamos a função que vai até a nuvem
@@ -188,7 +207,11 @@ export default function Painel() {
         });
 
         if (!resultado.ok) {
-          if (resultado.mensagem) alert(resultado.mensagem);
+          toastPainel(
+            "error",
+            "Não foi possível salvar a cor",
+            resultado.mensagem || "Verifique os dados informados e tente novamente."
+          );
           return;
         }
 
@@ -218,6 +241,14 @@ export default function Painel() {
 
         setNovaCorNome("");
         setNovaCorHex("#000000");
+
+        toastPainel(
+          "success",
+          "Cor cadastrada com sucesso",
+          resultado.tipo === "principal"
+            ? "A nova cor foi adicionada à lista principal do painel."
+            : "A nova cor foi vinculada ao material selecionado."
+        );
       };
 
       
@@ -456,7 +487,11 @@ export default function Painel() {
         );
       
         if (jaExiste) {
-          alert(`Erro: Este ${enumAtual === 'tipo' ? 'material' : 'tamanho'} já está cadastrado!`);
+          toastPainel(
+            "error",
+            `Esse ${enumAtual === 'tipo' ? 'material' : 'tamanho'} já existe`,
+            "Escolha outro nome para continuar o cadastro."
+          );
           return; 
         }
 
@@ -467,6 +502,11 @@ export default function Painel() {
     
         if (error) {
           console.error("Erro ao adicionar na tabela:", error);
+          toastPainel(
+            "error",
+            "Não foi possível cadastrar o material",
+            "Tente novamente em instantes."
+          );
         } else {
           if (enumAtual === 'tipo' && data && data.length > 0) {
             const idNovoMaterial = data[0].id_tip; 
@@ -474,13 +514,23 @@ export default function Painel() {
             const coresParaSalvar = coresSelecionadasPorMaterial[materialChave] || [];
 
             if (coresParaSalvar.length > 0) {
-              await salvarCoresNoBanco(idNovoMaterial, coresParaSalvar);
+              const resultadoCores = await salvarCoresNoBanco(idNovoMaterial, coresParaSalvar);
+
+              if (!resultadoCores.ok) {
+                return;
+              }
             }
           }
           
           await carregarFiltros(); 
           setModalEnumAberto(false);
           setNovoValorEnum("");
+
+          toastPainel(
+            "success",
+            `${enumAtual === 'tipo' ? 'Material' : 'Tamanho'} cadastrado`,
+            `O novo ${enumAtual === 'tipo' ? 'material' : 'tamanho'} foi salvo com sucesso.`
+          );
         }
       };
 
@@ -519,18 +569,32 @@ export default function Painel() {
 
         if (error) {
           console.error("Erro ao editar na tabela:", error);
-          alert("Erro ao editar o item no banco.");
+          toastPainel(
+            "error",
+            "Não foi possível atualizar",
+            "O item não pôde ser salvo no momento."
+          );
         } else {
           if (enumAtual === 'tipo') {
             const materialChave = novoValorEnum.trim().toLowerCase();
             const coresParaSalvar = coresSelecionadasPorMaterial[materialChave] || [];
-            await salvarCoresNoBanco(enumEditandoId, coresParaSalvar);
+            const resultadoCores = await salvarCoresNoBanco(enumEditandoId, coresParaSalvar);
+
+            if (!resultadoCores.ok) {
+              return;
+            }
           }
 
           await carregarFiltros();
           setModalEnumAberto(false);
           setNovoValorEnum("");
           setEnumEditandoId(null);
+
+          toastPainel(
+            "success",
+            `${enumAtual === 'tipo' ? 'Material' : 'Tamanho'} atualizado`,
+            `As alterações em ${enumAtual === 'tipo' ? 'material' : 'tamanho'} foram salvas com sucesso.`
+          );
         }
       };
 

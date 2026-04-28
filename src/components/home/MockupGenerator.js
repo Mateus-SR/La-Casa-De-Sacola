@@ -58,11 +58,11 @@ export default function MockupGenerator() {
 
   const [cardVirado, setCardVirado] = useState(false);
 
-  // Pré-carrega todas as fotos uma vez ao montar
+  //pré-carrega todas as fotos uma vez ao montar
   useEffect(() => {
     SACOLAS.forEach((sacola) => {
       const img = new Image();
-      img.crossOrigin = "anonymous"; // necessário para usar no Canvas
+      img.crossOrigin = "anonymous"; // necessário para usar no canvas
       img.onload = () => {
         setImagensSacolas((prev) => ({ ...prev, [sacola.id]: img }));
       };
@@ -86,7 +86,7 @@ export default function MockupGenerator() {
     const observador = new IntersectionObserver(
       (entradas) => {
         if (entradas[0].isIntersecting) {
-          const tutorial = driver();
+          const tutorial = driver;
           document?.activeElement?.blur();
           tutorial.highlight({
             element: "#canvas-mockup",
@@ -112,6 +112,8 @@ export default function MockupGenerator() {
     return () => observador.disconnect();
   }, []);
 
+  //para resetar o tutorial, localStorage.removeItem("tutorialMockupVisto") no console do navegador
+
   function handleSelecionarSacola(sacola) {
     setSacolaSelecionada(sacola);
     setCardVirado(false);
@@ -132,7 +134,7 @@ export default function MockupGenerator() {
     setOffsetY(0);
   }
 
-  // Lê o arquivo enviado e cria o objeto Image
+  //lê o arquivo enviado e cria o objeto Image
   function carregarImagem(arquivo) {
     if (!arquivo || !arquivo.type.startsWith("image/")) return;
 
@@ -147,7 +149,7 @@ export default function MockupGenerator() {
     leitor.readAsDataURL(arquivo);
   }
 
-  // Eventos de upload
+  //upload
   function handleDragOver(evento) {
     evento.preventDefault();
     setArrastando(true);
@@ -167,17 +169,13 @@ export default function MockupGenerator() {
     carregarImagem(evento.target.files[0]);
   }
 
-  // Função principal de renderização
+  // função principal de renderização
   function renderizarMockup() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const CW = CANVAS_TAMANHO;
     const CH = CANVAS_TAMANHO;
-
-    ctx.clearRect(0, 0, CW, CH);
-    ctx.fillStyle = "#f9f7f4";
-    ctx.fillRect(0, 0, CW, CH);
 
     const fotoSacola = imagensSacolas[sacolaSelecionada.id];
     if (!fotoSacola) {
@@ -236,7 +234,7 @@ export default function MockupGenerator() {
     ctx.restore();
   }
 
-  // Download
+  //download
   function handleDownload() {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -246,9 +244,9 @@ export default function MockupGenerator() {
     link.click();
   }
 
-  // JSX
+  //JSX
   return (
-    <section id="mockup" className="py-20 bg-[#f9f7f4]">
+    <section id="mockup" className="py-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Cabeçalho */}
         <div className="text-center mb-12">
@@ -268,9 +266,9 @@ export default function MockupGenerator() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-10 items-start">
-          {/* Coluna esquerda: controles */}
+          {/* coluna esquerda: controles */}
           <div className="flex flex-col gap-6">
-            {/* Upload */}
+            {/* upload */}
             <label
               className={`flex flex-col items-center justify-center gap-3 p-10 rounded-3xl border-2 border-dashed cursor-pointer transition-all ${
                 arrastando
@@ -303,7 +301,7 @@ export default function MockupGenerator() {
               </span>
             </label>
 
-            {/* Seletor de sacola */}
+            {/* seletor de sacola */}
             <div>
               <p className="text-xs font-semibold text-[#6b9e8a] uppercase tracking-wider mb-3">
                 Tipo de sacola
@@ -328,7 +326,7 @@ export default function MockupGenerator() {
               </div>
             </div>
 
-            {/* Sliders */}
+            {/* posição imagem */}
             {imagemUsuario && (
               <div className="bg-white rounded-3xl border border-[#e4f4ed] p-6">
                 <p className="text-xs font-semibold text-[#6b9e8a] uppercase tracking-wider mb-4">
@@ -388,9 +386,8 @@ export default function MockupGenerator() {
             )}
           </div>
 
-          {/* Coluna direita: canvas */}
+          {/* coluna direita: canvas */}
           <div className="flex flex-col items-center gap-5">
-            {/* Wrapper do card com perspectiva 3D */}
             <div
               className="w-full"
               style={{
@@ -407,7 +404,7 @@ export default function MockupGenerator() {
                   aspectRatio: "1 / 1",
                 }}
               >
-                {/* ── FRENTE: canvas ── */}
+                {/* frente: canvas */}
                 <div
                   className="w-full h-full bg-white rounded-3xl border border-[#e4f4ed] p-4 flex items-center justify-center"
                   style={{
@@ -424,17 +421,9 @@ export default function MockupGenerator() {
                     height={CANVAS_TAMANHO}
                     className={`max-w-full rounded-2xl ${!imagemUsuario ? "cursor-pointer" : ""}`}
                   />
-                  {/* Dica de clique — só aparece quando não tem imagem */}
-                  {/* {!imagemUsuario && (
-                    <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none">
-                      <span className="bg-[#264f41]/80 text-white text-xs font-medium px-3 py-1.5 rounded-full">
-                        📏 Clique para ver o que cabe
-                      </span>
-                    </div>
-                  )} */}
                 </div>
 
-                {/* ── VERSO: comparação de tamanho ── */}
+                {/* trás: comparação de tamanho */}
                 <div
                   className="w-full h-full bg-white rounded-3xl border border-[#e4f4ed] p-6 flex flex-col items-center justify-center gap-4"
                   style={{
@@ -472,7 +461,7 @@ export default function MockupGenerator() {
               </p>
             )}
 
-            {/* Botão remover imagem */}
+            {/* remover imagem */}
             {imagemUsuario && (
               <button
                 onClick={handleRemoverImagem}
