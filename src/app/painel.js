@@ -18,6 +18,7 @@ import {
 // import useVerificaAcessoAdmin from "../hooks/verificaAcesso";
 // Depois preciso "refatorar" o hook e componente relacionado ao acesso administrador, foi erro meu -Mateus
 import { useState, useEffect } from "react";
+import { Toaster, toast } from "react-hot-toast";
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import * as Checkbox from '@radix-ui/react-checkbox';
@@ -355,7 +356,7 @@ export default function Painel() {
             .eq('id_sac', sacolaEditandoId)
             .select();
     
-          if (error) {
+            if (error) {
             console.error("Erro ao editar:", error);
           } else if (data) {
             // 👈 AQUI ESTÁ A MÁGICA: se data[0] for undefined, usamos o { ...sacola, ...novaSacola }
@@ -365,6 +366,7 @@ export default function Painel() {
                 : sacola
             );
             setSacolas(sacolasAtualizadas);
+            toast.success("Sacola atualizada!");
           }
     
         } else {
@@ -387,6 +389,7 @@ export default function Painel() {
           } else if (data && data[0]) { 
             // 👈 Protegemos aqui também para evitar inserir undefined
             setSacolas([...sacolas, data[0]]);
+            toast.success("Sacola cadastrada!");
           }
         };
     
@@ -554,6 +557,7 @@ export default function Painel() {
   return (
     <RotaAdmin>
       <main className="p-5 m-auto bg-gray-100 h-screen flex flex-col">
+        <Toaster position="top-right" />
         <meta charSet="UTF-8" />
         <button onClick={() => router.push('/')} className="bg-[#264f41] hover:bg-[#403c37] text-white px-2.5 py-2.5 rounded-xl font-bold transition shadow-md flex items-left gap-2 text-md lg:text-md w-max mb-5">
           ← Voltar
