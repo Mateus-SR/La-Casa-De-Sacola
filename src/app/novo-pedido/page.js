@@ -28,7 +28,7 @@ export default function CarrinhoPage() {
 
         if (!user) {
           // Usuário não logado: redireciona para login e não autoriza
-          toast.error("Você precisa estar logado para acessar o carrinho.");
+          toast.error("Você precisa estar logado para fazer um pedido.");
           router.push("/login");
           return;
         }
@@ -42,7 +42,7 @@ export default function CarrinhoPage() {
 
         if (profile?.cargo === "administrador") {
           // Administrador: não deve ver o carrinho
-          toast.error("Administradores não possuem acesso ao carrinho de compras.");
+          toast.error("No momento, administradores não podem registrar pedidos em nome dos clientes.");
           router.push("/painel"); // Redireciona para o painel administrativo
           return;
         }
@@ -57,22 +57,6 @@ export default function CarrinhoPage() {
 
     checkAccess();
   }, [router]);
-
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.precounitario_sac * item.quantity,
-    0
-  );
-
-  const total = subtotal + valorFrete;
-
-  const calcularFrete = () => {
-    if (cep.length >= 8) {
-      toast.success("Frete calculado!");
-      setValorFrete(25.90);
-    } else {
-      toast.error("Insira um CEP válido.");
-    }
-  };
 
   // Enquanto verifica o login/tipo de usuário, exibe um estado de carregamento ou nada
   if (loading) return null; 
@@ -91,10 +75,10 @@ export default function CarrinhoPage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <Link href="/catalogo" className="flex items-center gap-2 text-[#6b9e8a] hover:text-[#3ca779] transition-colors font-bold text-sm mb-2">
-                <ChevronLeftIcon /> Continuar comprando
+                <ChevronLeftIcon /> Voltar para Página Inicial
               </Link>
               <h1 className="text-4xl font-extrabold text-[#264f41]" style={{ fontFamily: "'Quicksand', sans-serif" }}>
-                Meu Carrinho
+                Novo pedido
               </h1>
             </div>
             <div className="text-right">
