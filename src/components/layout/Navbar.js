@@ -190,11 +190,11 @@ export default function Navbar() {
 
                           <hr className="my-1 border-[#e4f4ed]" />
 
-                          <Link href="/perfil" className="block px-4 py-3 text-sm font-bold text-[#264f41] hover:bg-[#f7f4eb]" onClick={() => setDropdownOpen(false)}>
+                          <Link href="/novo-pedido" className="block px-4 py-3 text-sm font-bold text-[#264f41] hover:bg-[#f7f4eb]" onClick={() => setDropdownOpen(false)}>
                           <div className="flex flex-row items-center">
-                            <PlusIcon className="size-4 mr-1"></PlusIcon> Fazer Pedido
+                            <PlusIcon className="size-5 mr-1"></PlusIcon> Novo Pedido
                           </div>
-                            <span className="block text-xs font-medium text-[#6e8679] mt-0.5">Dados, pedidos e endereços</span>
+                            <span className="block text-xs font-medium text-[#6e8679] mt-0.5">Sua melhor sacola te aguarda!</span>
                           </Link>
                         </>
                       )}
@@ -301,9 +301,9 @@ export default function Navbar() {
 
                           <hr className="my-1 border-[#e4f4ed]" />
 
-                          <Link href="/perfil" className="text-sm font-bold text-[#264f41] py-2" onClick={() => setMenuOpen(false)}>
+                          <Link href="/novo-pedido" className="text-sm font-bold text-[#264f41] py-2" onClick={() => setMenuOpen(false)}>
                           <div className="flex flex-row items-center">
-                            <PlusIcon className="size-4 mr-1"></PlusIcon> Fazer Pedido
+                            <PlusIcon className="size-4 mr-1"></PlusIcon> Novo Pedido
                           </div>
                           </Link>
                         </>
