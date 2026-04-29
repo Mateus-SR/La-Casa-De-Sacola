@@ -65,14 +65,36 @@ export default function CarrinhoPage() {
 
   const total = subtotal + valorFrete;
 
-  const calcularFrete = () => {
-    if (cep.length >= 8) {
-      toast.success("Frete calculado!");
-      setValorFrete(25.90);
-    } else {
-      toast.error("Insira um CEP válido.");
-    }
-  };
+  // Adicione estes estados dentro do seu componente
+const [loadingFrete, setLoadingFrete] = useState(false);
+
+// Atualize a função calcularFrete
+const calcularFrete = async () => {
+  // Validação Regex para CEP (formatos 00000000 ou 00000-000)
+  const cepRegex = /^\d{5}-?\d{3}$|^\d{8}$/;
+  
+  if (!cepRegex.test(cep)) {
+    toast.error("Formato de CEP inválido. Use 00000-000.");
+    return;
+  }
+
+  setLoadingFrete(true);
+  
+  // Simulação de chamada de API (Melhor Envio)
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Delay simulando rede
+    
+    // Simulação de cálculo aleatório entre 15 e 40 reais
+    const freteSimulado = (Math.random() * (50 - 20) + 15).toFixed(2);
+    
+    setValorFrete(parseFloat(freteSimulado));
+    toast.success("Frete calculado com sucesso!");
+  } catch (error) {
+    toast.error("Erro ao calcular frete. Tente novamente.");
+  } finally {
+    setLoadingFrete(false);
+  }
+};
 
   // Enquanto verifica o login/tipo de usuário, exibe um estado de carregamento ou nada
   if (loading) return null; 
@@ -197,11 +219,12 @@ export default function CarrinhoPage() {
                             maxLength="9"
                           />
                           <button 
-                            onClick={calcularFrete}
-                            className="bg-[#f0faf5] text-[#3ca779] font-bold px-4 py-2 rounded-xl border border-[#e4f4ed] hover:bg-[#e4f4ed] transition-colors text-sm"
-                          >
-                            OK
-                          </button>
+  onClick={calcularFrete}
+  disabled={loadingFrete}
+  className="bg-[#f0faf5] text-[#3ca779] font-bold px-4 py-2 rounded-xl border border-[#e4f4ed] hover:bg-[#e4f4ed] transition-colors text-sm disabled:opacity-50"
+>
+  {loadingFrete ? "Calculando..." : "OK"}
+</button>
                         </div>
                       )}
 
