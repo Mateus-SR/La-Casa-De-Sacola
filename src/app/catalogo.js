@@ -20,10 +20,10 @@ export default function ProdutosModelos() {
   // Filtros
   const [filtroTamanho, setFiltroTamanho] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
-  const [filtroCor, setFiltroCor] = useState("");
+  // const [filtroCor, setFiltroCor] = useState(""); // Comentado para uso futuro
   const [opcoesTipo, setOpcoesTipo] = useState([]);
   const [opcoesTamanho, setOpcoesTamanho] = useState([]);
-  const [opcoesCor, setOpcoesCor] = useState([]);
+  // const [opcoesCor, setOpcoesCor] = useState([]); // Comentado para uso futuro
 
   useEffect(() => {
     carregarOpcoesFiltros();
@@ -38,11 +38,14 @@ export default function ProdutosModelos() {
       const de = (paginaAtual - 1) * itensPorPagina;
       const ate = de + itensPorPagina - 1;
 
-      // Se tiver filtro de cor, usamos !inner para filtrar a tabela pai (sacola)
-      // Se não, usamos o join normal
-      const selectQuery = filtroCor 
+      // Logica de filtro de cor comentada na query
+      /* const selectQuery = filtroCor 
         ? `*, sacola_cor!inner(cores!inner(nome_cor, hex_cor))` 
-        : `*, sacola_cor(cores(nome_cor, hex_cor))`;
+        : `*, sacola_cor(cores(nome_cor, hex_cor))`; 
+      */
+      
+      // Query padrão sem filtro de cor ativo
+      const selectQuery = `*, sacola_cor(cores(nome_cor, hex_cor))`;
 
       let query = supabase
         .from('sacola')
@@ -57,18 +60,12 @@ export default function ProdutosModelos() {
         query = query.eq('tamanho_sac', filtroTamanho);
       }
 
-      // Filtro de cor usando o caminho correto agora que o !inner está no select
-      if (filtroCor) {
-        query = query.eq('sacola_cor.cores.nome_cor', filtroCor);
-      }
-
       const { data, error, count } = await query.range(de, ate);
 
       if (error) {
         throw error; 
       } 
       
-      // Atualiza o estado
       setProdutos(data || []);
       setTotalPaginas(Math.ceil((count || 0) / itensPorPagina));
 
@@ -81,39 +78,39 @@ export default function ProdutosModelos() {
 
     carregarProdutos();
     return () => { isMounted = false; };
-  }, [paginaAtual, filtroTipo, filtroTamanho, filtroCor]);
+  }, [paginaAtual, filtroTipo, filtroTamanho /*, filtroCor */]); // Dependência de cor comentada
 
   const carregarOpcoesFiltros = async () => {
-    // Busca os tipos
     const { data: tipos } = await supabase.from('tipo').select('tipo_tip');
     if (tipos) {
       const tiposUnicos = [...new Set(tipos.map(t => t.tipo_tip))];
       setOpcoesTipo(tiposUnicos);
     }
 
-    // Busca tamanhos
     const { data: tamanhos } = await supabase.from('tamanho').select('tamanho_tam');
     if (tamanhos) {
       const tamanhosUnicos = [...new Set(tamanhos.map(t => t.tamanho_tam))];
       setOpcoesTamanho(tamanhosUnicos);
     }
 
-    // Busca cores da tabela cores
+    // Busca de cores comentada
+    /*
     const { data: cores } = await supabase.from('cores').select('nome_cor');
     if (cores) {
       const coresUnicas = [...new Set(cores.map(c => c.nome_cor))];
       setOpcoesCor(coresUnicas);
     }
+    */
   };
 
   const limparFiltros = () => {
     setFiltroTipo("");
     setFiltroTamanho("");
-    setFiltroCor("");
+    // setFiltroCor(""); // Comentado
     setPaginaAtual(1);
   };
 
-  const temFiltrosAtivos = filtroTipo || filtroTamanho || filtroCor;
+  const temFiltrosAtivos = filtroTipo || filtroTamanho;
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -121,7 +118,6 @@ export default function ProdutosModelos() {
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
-        {/* HEADER */}
         <div className="text-center mb-16">
           <span className="inline-block bg-[#f0faf5] text-[#3ca779] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             Nossos Produtos
@@ -167,6 +163,7 @@ export default function ProdutosModelos() {
               </select>
             </div>
 
+            {/* FILTRO DE COR COMENTADO (VISUAL E LÓGICA)
             <div className="flex flex-col min-w-[220px]">
               <label className="text-xs font-bold uppercase text-[#6b9e8a] mb-2">Cor</label>
               <select 
@@ -178,8 +175,9 @@ export default function ProdutosModelos() {
                 {opcoesCor.map(opcao => (
                   <option key={opcao} value={opcao}>{opcao}</option>
                 ))}
-              </select>
+              </select> 
             </div>
+            */}
 
             {temFiltrosAtivos && (
               <button 
