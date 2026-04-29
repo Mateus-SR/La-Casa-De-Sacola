@@ -9,7 +9,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function CarrinhoPage() {
-  const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart();
+const { cartItems, removeFromCart, updateQuantity, cartCount, clearCart } = useCart();
   const router = useRouter();
   
   // Estados de controle de acesso
@@ -119,6 +119,62 @@ const calcularFrete = async () => {
     toast.error("Falha ao calcular o frete.");
   } finally {
     setLoadingFrete(false);
+  }
+};
+
+const finalizarCompra = async () => {
+  setLoading(true);
+  try {
+    // 1. Obtém o usuário de forma segura
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      throw new Error("Sessão expirada. Faça login novamente.");
+    }
+
+    // 2. Cria o registro do pedido
+    // Verifique se as colunas 'uuid_usu', 'valor_total' e 'status' existem exatamente com esses nomes
+    const { data: pedido, error: pedidoError } = await supabase
+      .from("pedido")
+      .insert({
+        uuid_usu: user.id,
+        valor_total: total,
+        status: "pendente"
+      })
+      .select()
+      .single();
+
+    if (pedidoError) {
+      console.error("Erro na tabela pedido:", pedidoError);
+      throw new Error(`Erro no pedido: ${pedidoError.message}`);
+    }
+
+    // 3. Cria os itens do pedido
+    // Verifique se a chave primária da sua tabela pedido é 'id' ou 'id_pedido'
+    const itens = cartItems.map((item) => ({
+      pedido_id: pedido.id, 
+      sacola_id: item.id_sac,
+      quantidade: item.quantity,
+      preco_unitario: item.precounitario_sac,
+    }));
+
+    const { error: itensError } = await supabase.from("item_pedido").insert(itens);
+
+    if (itensError) {
+      console.error("Erro na tabela item_pedido:", itensError);
+      throw new Error(`Erro nos itens: ${itensError.message}`);
+    }
+
+    // 4. Sucesso e Limpeza
+    clearCart();
+    toast.success("Pedido realizado com sucesso!");
+    router.push("/pedidos"); 
+
+  } catch (error) {
+    console.error("Erro detalhado:", error);
+    toast.error(error.message || "Erro ao finalizar o pedido.");
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -292,9 +348,13 @@ const calcularFrete = async () => {
                     </div>
                   </div>
 
-                  <button className="w-full bg-[#264f41] hover:bg-[#1a362c] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-[#264f41]/20 mb-4">
-                    Finalizar Compra
-                  </button>
+                 <button 
+  onClick={finalizarCompra}
+  disabled={loading || cartItems.length === 0}
+  className="w-full bg-[#264f41] hover:bg-[#1a362c] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-[#264f41]/20 mb-4 disabled:opacity-50"
+>
+  {loading ? "Processando..." : "Finalizar Compra"}
+</button>
                 </div>
               </div>
             </div>
