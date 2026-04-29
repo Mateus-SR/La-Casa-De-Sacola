@@ -118,7 +118,7 @@ export default function Cadastro() {
           uuid_usu: authData.user.id, 
           nome_usu: formData.nome,    
           email_usu: formData.email,  
-          cargo: 'cliente'            
+          cargo: 'usuário'            
         }, { onConflict: 'uuid_usu' });
 
       if (dbError) {
