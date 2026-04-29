@@ -86,7 +86,7 @@ export default function MockupGenerator() {
     const observador = new IntersectionObserver(
       (entradas) => {
         if (entradas[0].isIntersecting) {
-          const tutorial = driver;
+          const tutorial = driver();
           document?.activeElement?.blur();
           tutorial.highlight({
             element: "#canvas-mockup",
