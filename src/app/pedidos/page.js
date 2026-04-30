@@ -120,12 +120,12 @@ export default function PedidosPage() {
 
             {pedidoAberto === pedido.id_ped && (
               <div className="mt-4 pt-4 border-t border-gray-100 w-full">
-                <p className="text-xs font-bold text-gray-400 uppercase mb-3">Itens desta sacola</p>
+                <p className="text-xs font-bold text-gray-400 uppercase mb-3">Itens desse pedido:</p>
                 <div className="space-y-2">
                   {pedido.itens_pedido?.map((item) => (
                     <div key={item.id_ten} className="text-sm text-gray-600 flex justify-between bg-[#f4f7f5] p-2 rounded-lg">
-                      <span>{item.quantidade}x Sacola {item.cor_sacola}</span>
-                      <span className="font-medium text-[#264f41]">R$ {Number(item.preco).toFixed(2)}</span>
+                      <span>{item.quantidade}x Sacolas {item.cor_sacola}</span>
+                      <span className="font-semibold text-md text-[#264f41]">R$ {Number(pedido.valor_total).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>

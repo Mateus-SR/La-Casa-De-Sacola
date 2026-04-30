@@ -64,15 +64,25 @@ export function CartProvider({ children }) {
 
   const addToCart = (product) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id_sac === product.id_sac);
+      // Pega a quantidade configurada no frontend (ex: 999). Se não tiver, assume 1.
+      const quantidadeParaAdicionar = product.quantity || 1;
+
+      // Procura se já existe no carrinho o MESMO modelo com a MESMA cor
+      const existingItem = prevItems.find(
+        (item) => item.id_sac === product.id_sac && item.cor_id === product.cor_id
+      );
+
       if (existingItem) {
+        // Se já existe, soma as quantidades
         return prevItems.map((item) =>
-          item.id_sac === product.id_sac
-            ? { ...item, quantity: item.quantity + 1 }
+          (item.id_sac === product.id_sac && item.cor_id === product.cor_id)
+            ? { ...item, quantity: item.quantity + quantidadeParaAdicionar }
             : item
         );
       }
-      return [...prevItems, { ...product, quantity: 1 }];
+      
+      // Se não existe, adiciona como item novo mantendo a quantidade escolhida
+      return [...prevItems, { ...product, quantity: quantidadeParaAdicionar }];
     });
   };
 

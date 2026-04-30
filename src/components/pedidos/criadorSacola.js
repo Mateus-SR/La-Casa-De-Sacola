@@ -134,7 +134,8 @@ const fetchDadosIniciais = async () => {
       onSacolaAdicionada({
         ...sacolaSelecionada,
         quantity: quantidade,
-        cor_sac: corSelecionada.nome_cor // Garante que a cor apareça no carrinho
+        cor_sac: corSelecionada.nome_cor, // Garante que a cor apareça no carrinho
+        cor_id: corSelecionada.id_cor
       });
       //resetWizard();
       setPasso(6);

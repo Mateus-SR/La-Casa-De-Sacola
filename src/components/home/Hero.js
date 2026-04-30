@@ -41,7 +41,7 @@ export default function Hero() {
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
               <Link
-                href="/cadastro"
+                href="/novo-pedido"
                 className="inline-flex items-center justify-center gap-2 bg-[#3ca779] hover:bg-[#2e8f65] text-white font-bold text-base px-8 py-4 rounded-2xl transition-all shadow-lg hover:shadow-[#3ca779]/30 hover:shadow-xl hover:-translate-y-0.5"
               >
                 <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">

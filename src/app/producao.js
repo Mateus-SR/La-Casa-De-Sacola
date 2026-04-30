@@ -12,12 +12,16 @@ import TabelaProducao from "../components/producao/TabelaProducao.js";
 import useVerificaAcessoAdmin from "../hooks/verificaAcesso.js";
 import { useRouter } from 'next/navigation';
 import { supabase } from "../lib/supabaseClient";
+import ModalAlterarStatus from "../components/producao/ModalAlterarStatus";
 
 export default function Producao() {
 
   const [pedidos, setPedidos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [pedidoAberto, setPedidoAberto] = useState(null);
+
+  const [modalStatusAberto, setModalStatusAberto] = useState(false);
+  const [pedidoParaEditar, setPedidoParaEditar]   = useState(null);
 
   const router = useRouter();
 
@@ -32,9 +36,17 @@ export default function Producao() {
       try {    
         // Busca os pedidos vinculados ao UUID do usuário logado
         const { data, error } = await supabase
-          .from("pedido")
-          .select("*, itens_pedido(*)")
-          .order("data_criacao", { ascending: false });
+        .from("pedido")
+        .select(`
+          *, 
+          usuario (nome_usu, email_usu),
+          itens_pedido (
+            *,
+            sacola (nome_sac, tipo_sac),
+            cores (nome_cor) 
+          )
+        `)
+        .order("data_criacao", { ascending: false });
   
         if (error) throw error;
   
@@ -56,9 +68,17 @@ export default function Producao() {
       setPedidoSelecionado(pedidoCompleto);
     }
 
-    const handleAlterarStatus = (pedidoSelecionado) => {
-      alert(`Opa! Ainda não.\n${pedidoSelecionado.status_ped}`);
-    }
+    const handleAlterarStatus = (pedido) => {
+      setPedidoParaEditar(pedido);
+      setModalStatusAberto(true);
+    };
+    
+    // Atualiza o estado local sem recarregar a página:
+    const handleStatusAtualizado = (idPedido, novoStatus) => {
+      setPedidos((prev) =>
+        prev.map((p) => p.id_ped === idPedido ? { ...p, status_ped: novoStatus } : p)
+      );
+    };
 
     const handleFecharModal = () => {
       setPedidoSelecionado(null);
@@ -86,9 +106,9 @@ export default function Producao() {
 
           <Tabs.Root
             defaultValue="producao"
-            className="w-full overflow-hidden">
+            className="w-full flex-1 min-h-0 flex flex-col">
             <Tabs.List
-              className="flex items-center mb-5 gap-5 bg-white p-4 rounded-xl shadow-sm border border-[#e4f4ed]">
+              className="flex items-center mb-5 gap-5 bg-white p-4 rounded-xl shadow-sm border border-[#e4f4ed] shrink-0">
 
               <Tabs.Trigger
                 value="aguardando"
@@ -116,16 +136,18 @@ export default function Producao() {
             </Tabs.List>
 
             <Tabs.Content
-              value="aguardando">
+              value="aguardando"
+              className="data-[state=active]:flex-1 data-[state=active]:min-h-0 data-[state=active]:flex data-[state=active]:flex-col">
                 <TabelaProducao
-                  dados={pedidos.filter(p => p.status_ped === 'Pago Aguardando Produção' || p.status_ped === "Aguardando Pagamento" || p.status_ped === "No Carrinho")}
+                  dados={pedidos.filter(p => p.status_ped === 'Pago Aguardando Produção' || p.status_ped === "Aguardando Pagamento" || p.status_ped === "No Carrinho" || p.status_ped === "pendente")}
                   onAbrirDetalhes={handleAbrirPedido}
                   handleAlterarStatus={handleAlterarStatus}
                   handleDetalhesCliente={handleDetalhesCliente}/>
             </Tabs.Content>
 
             <Tabs.Content
-              value="producao">
+              value="producao"
+              className="data-[state=active]:flex-1 data-[state=active]:min-h-0 data-[state=active]:flex data-[state=active]:flex-col">
                 <TabelaProducao
                   dados={pedidos.filter(p => p.status_ped === 'Em Produção')}
                   onAbrirDetalhes={handleAbrirPedido}
@@ -134,7 +156,8 @@ export default function Producao() {
             </Tabs.Content>
 
             <Tabs.Content
-              value="entrega">
+              value="entrega"
+              className="data-[state=active]:flex-1 data-[state=active]:min-h-0 data-[state=active]:flex data-[state=active]:flex-col">
               <TabelaProducao
                 dados={pedidos.filter(p => p.status_ped === 'Entregue' || p.status_ped === 'A Caminho' || p.status_ped === 'Aguardando Retirada')}
                 onAbrirDetalhes={handleAbrirPedido}
@@ -143,7 +166,8 @@ export default function Producao() {
             </Tabs.Content>
 
             <Tabs.Content
-              value="cancelado">
+              value="cancelado"
+              className="data-[state=active]:flex-1 data-[state=active]:min-h-0 data-[state=active]:flex data-[state=active]:flex-col">
               <TabelaProducao
                 dados={pedidos.filter(p => p.status_ped === 'Cancelado')}
                 onAbrirDetalhes={handleAbrirPedido}
@@ -168,7 +192,7 @@ export default function Producao() {
                     <td className="p-4 font-bold text-[#264f41] max-w-[250px] truncate">{pedido.id}</td>
                     <td className="p-3 text-center">{pedido.quantidade}</td>
                     <td className="p-3 text-center">R${pedido.preco.toFixed(2)}</td>
-                    <td className="p-3 text-center">
+                    <td className="p-3 text-center">D
                       <button 
                         className="text-blue-600 hover:text-blue-800"
                         onClick={() => handleAbrirPedido(pedido.id)}>
@@ -187,47 +211,69 @@ export default function Producao() {
             <Dialog.Overlay className="bg-black/50 fixed inset-0 backdrop-blur-sm z-40" />
             <Dialog.Content 
               aria-describedby={undefined} 
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-2xl shadow-2xl w-[min(92vw,40rem)] max-h-[90vh] z-[100] overflow-y-auto custom-scrollbar flex flex-col gap-6"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-2xl shadow-2xl w-[min(92vw,50rem)] max-h-[90vh] z-[100] overflow-y-auto custom-scrollbar flex flex-col gap-6"
             >
               <Dialog.Title className="flex justify-between items-center border-b border-gray-100 pb-4 m-0">
                 <div>
                   <h2 className="text-md lg:text-xl font-extrabold text-[#264f41] uppercase tracking-tight">
                     Pedido #{pedidoSelecionado?.id_ped}
                   </h2>
-                  <p className="text-xs font-bold text-gray-500 uppercase mt-1">
-                    Realizado em: {pedidoSelecionado && new Date(pedidoSelecionado.data_criacao).toLocaleDateString('pt-BR')}
-                  </p>
+                  <div className="flex gap-3 items-center mt-1">
+                    <p className="text-xs font-bold text-gray-500 uppercase">
+                      Realizado em: {pedidoSelecionado && new Date(pedidoSelecionado.data_criacao).toLocaleDateString('pt-BR')}
+                    </p>
+                    <span className="px-2 py-1 bg-[#e4f4ed] text-[#264f41] text-[10px] font-black rounded uppercase">
+                      {pedidoSelecionado?.status_ped}
+                    </span>
+                  </div>
                 </div>
               </Dialog.Title>
 
+              {/* Informações do Cliente */}
+              <div className="bg-[#f9fdfa] border border-[#e4f4ed] rounded-xl p-4">
+                <p className="text-xs font-bold text-[#3ca779] uppercase tracking-wider mb-2">Dados do Cliente</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Nome</p>
+                    <p className="font-semibold text-[#264f41]">{pedidoSelecionado?.usuario?.nome_usu || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="font-semibold text-[#264f41]">{pedidoSelecionado?.usuario?.email_usu || 'Não informado'}</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Lista de Itens */}
-              <div className="flex flex-col gap-3 flex-1 overflow-y-auto">
-                <p className="text-xs font-bold text-gray-400 uppercase">Itens do pedido:</p>
+              <div className="flex flex-col gap-3 flex-1 overflow-y-auto mt-2">
+                <p className="text-xs font-bold text-[#3ca779] uppercase tracking-wider">Itens a Produzir:</p>
                 {pedidoSelecionado?.itens_pedido?.map((item) => (
                   <div key={item.id_ten} className="bg-[#f4f7f5] border border-[#e4f4ed] rounded-xl p-4 flex justify-between items-center">
                     <div>
-                      <p className="font-bold text-[#264f41]">Sacola {item.cor_sacola}</p>
+                      {/* Tenta pegar o nome da sacola do join, se não achar, usa um texto genérico */}
+                      <p className="font-bold text-[#264f41]">
+                        {item.sacola?.nome_sac || 'Sacola Personalizada'} - Cor: {item.cores?.nome_cor || item.cor_id}
+                      </p>
                       <p className="text-sm text-gray-600">{item.quantidade}x unidades</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-400 font-bold uppercase">Preço Un.</p>
-                      <p className="font-black text-[#3ca779]">R$ {Number(item.preco).toFixed(2)}</p>
+                      <p className="text-xs text-gray-400 font-bold uppercase">Subtotal</p>
+                      <p className="font-black text-[#3ca779]">R$ {(Number(item.preco) * item.quantidade).toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Rodapé: Resumo de Valores */}
-{/*               <div className="mt-2 pt-6 border-t border-gray-100">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-gray-600 font-bold uppercase text-sm">Total do Pedido:</span>
+              <div className="mt-2 pt-4 border-t border-gray-100 bg-[#f9fdfa] p-4 rounded-xl">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 font-bold uppercase text-sm">Valor Total (estimativa do frente inclusa):</span>
                   <span className="text-2xl font-black text-[#264f41]">
-                    R$ {pedidoSelecionado?.itens_pedido?.reduce((acc, item) => acc + (Number(item.preco) * item.quantidade), 0).toFixed(2)}
+                    R$ {Number(pedidoSelecionado?.valor_total || 0).toFixed(2)}
                   </span>
                 </div>
-              </div> */}
+              </div>
 
-              {/* Botão X no canto superior direito (Padrão do seu Painel) */}
               <Dialog.Close asChild>
                 <button className="absolute top-5 right-5 text-gray-400 hover:text-black font-bold text-lg transition">✕</button>
               </Dialog.Close>
@@ -257,6 +303,13 @@ export default function Producao() {
             />
           </div>
         )}
+        
+        <ModalAlterarStatus
+          pedido={pedidoParaEditar}
+          open={modalStatusAberto}
+          onOpenChange={setModalStatusAberto}
+          onStatusAtualizado={handleStatusAtualizado}
+        />
       </>
       </RotaAdmin>
     );

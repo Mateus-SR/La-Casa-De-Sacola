@@ -21,6 +21,9 @@ const { cartItems, removeFromCart, updateQuantity, cartCount, clearCart } = useC
   const [cep, setCep] = useState("");
   const [valorFrete, setValorFrete] = useState(0);
 
+  const [enderecosSalvos, setEnderecosSalvos] = useState([]);
+  const [mostrarDropdownCep, setMostrarDropdownCep] = useState(false);
+  
   useEffect(() => {
     const checkAccess = async () => {
       try {
@@ -48,6 +51,19 @@ const { cartItems, removeFromCart, updateQuantity, cartCount, clearCart } = useC
         }
 
         setAuthorized(true);
+
+        // Busca os endereços do usuário
+        const { data: meusEnderecos, error: endError } = await supabase
+          .from("endereco")
+          .select("cep_end") // Se tiver uma coluna de apelido (ex: "Casa"), pode adicionar aqui: .select("cep_end, apelido")
+          .eq("uuid_usu", user.id);
+
+        if (!endError && meusEnderecos) {
+          // Filtra para remover CEPs vazios ou duplicados, se necessário
+          const cepsUnicos = Array.from(new Set(meusEnderecos.map(e => e.cep_end)))
+            .map(cep => ({ cep_end: cep }));
+          setEnderecosSalvos(cepsUnicos);
+        }
       } catch (error) {
         console.error("Erro ao verificar acesso:", error);
       } finally {
@@ -152,13 +168,14 @@ const finalizarCompra = async () => {
     // 3. Cria os itens do pedido
     // Verifique se a chave primária da sua tabela pedido é 'id' ou 'id_pedido'
     const itens = cartItems.map((item) => ({
-      pedido_id: pedido.id, 
-      sacola_id: item.id_sac,
+      ped_id: pedido.id_ped, 
+      sac_id: item.id_sac,
       quantidade: item.quantity,
-      preco_unitario: item.precounitario_sac,
+      preco: item.precounitario_sac,
+      cor_id: item.cor_id
     }));
 
-    const { error: itensError } = await supabase.from("item_pedido").insert(itens);
+    const { error: itensError } = await supabase.from("itens_pedido").insert(itens);
 
     if (itensError) {
       console.error("Erro na tabela item_pedido:", itensError);
@@ -219,9 +236,15 @@ const finalizarCompra = async () => {
               </div>
               <h2 className="text-2xl font-bold text-[#264f41] mb-2">Seu carrinho está vazio</h2>
               <p className="text-[#6b9e8a] mb-8">Parece que você ainda não adicionou nenhum modelo de sacola.</p>
+              <div className="flex gap-4 justify-center">
               <Link href="/catalogo" className="bg-[#3ca779] hover:bg-[#2e8f65] text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-[#3ca779]/30 inline-block">
                 Explorar Catálogo
               </Link>
+              <Link href="/novo-pedido" className="bg-[#3ca779] hover:bg-[#2e8f65] text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-[#3ca779]/30 inline-block">
+                Novo Pedido
+              </Link>
+              </div>
+
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -291,24 +314,55 @@ const finalizarCompra = async () => {
                       </label>
 
                       {tipoFrete === "correios" && (
-                        <div className="pl-6 flex gap-2 transition-all mt-1">
-                          <input
-                            type="text"
-                            placeholder="00000-000"
-                            value={cep}
-                            onChange={(e) => setCep(e.target.value)}
-                            className="w-full border border-[#e4f4ed] rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#3ca779] text-[#264f41]"
-                            maxLength="9"
-                          />
-                          <button 
-  onClick={calcularFrete}
-  disabled={loadingFrete}
-  className="bg-[#f0faf5] text-[#3ca779] font-bold px-4 py-2 rounded-xl border border-[#e4f4ed] hover:bg-[#e4f4ed] transition-colors text-sm disabled:opacity-50"
->
-  {loadingFrete ? "Calculando..." : "OK"}
-</button>
-                        </div>
-                      )}
+  <div className="pl-6 flex gap-2 transition-all mt-1">
+    
+    {/* NOVO BLOCO COLADO AQUI (Passo 3) */}
+    <div className="relative w-full">
+      <input
+        type="text"
+        placeholder="00000-000"
+        value={cep}
+        onChange={(e) => {
+          setCep(e.target.value);
+          setMostrarDropdownCep(true); 
+        }}
+        onFocus={() => setMostrarDropdownCep(true)}
+        onBlur={() => setTimeout(() => setMostrarDropdownCep(false), 200)} 
+        className="w-full border border-[#e4f4ed] rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#3ca779] text-[#264f41]"
+        maxLength="9"
+      />
+      
+      {mostrarDropdownCep && enderecosSalvos.length > 0 && (
+        <div className="absolute z-10 w-max left-0 mt-1 bg-white border border-[#e4f4ed] rounded-xl shadow-lg max-h-60 overflow-y-auto">
+          {enderecosSalvos.map((end, idx) => (
+            <div
+              key={idx}
+              className="px-3 py-2 hover:bg-[#f0faf5] cursor-pointer text-sm text-[#264f41] transition-colors border-b border-[#e4f4ed] last:border-b-0"
+              onClick={() => {
+                setCep(end.cep_end);
+                setMostrarDropdownCep(false);
+              }}
+            >
+              <span className="font-bold">{end.cep_end}</span>
+              {/* <span className="font-bold">{meusEnderecos.rua_end}</span> */}
+              <span className="text-xs text-[#6b9e8a] ml-2 font-medium">Endereço Salvo</span>
+
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+    {/* FIM DO NOVO BLOCO */}
+
+    <button 
+      onClick={calcularFrete}
+      disabled={loadingFrete}
+      className="bg-[#f0faf5] text-[#3ca779] font-bold px-4 py-2 rounded-xl border border-[#e4f4ed] hover:bg-[#e4f4ed] transition-colors text-sm disabled:opacity-50"
+    >
+      {loadingFrete ? "Calculando..." : "OK"}
+    </button>
+  </div>
+)}
 
                       <label className="flex items-center gap-2 cursor-pointer text-[#6b9e8a] font-medium text-sm mt-2">
                         <input
