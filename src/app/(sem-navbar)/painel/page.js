@@ -12,6 +12,7 @@ import TabelaSacolas from "@/components/admin/TabelaSacolas";
 import ModalSacola from "@/components/admin/ModalSacola";
 import ModalGerenciarEnum from "@/components/admin/ModalGerenciarEnum";
 import EditarCoresDialog from "@/components/admin/EditarCoresDialog";
+import FiltrosSacola from "@/components/admin/FiltrosSacola";
 import PainelToast from "@/components/admin/PainelToast";
 
 // Bibliotecas e Utils
@@ -50,7 +51,11 @@ export default function Painel() {
     handleAbrirEdicao,
     handleAbrirNovaSacola,
     obterCoresDisponiveisParaNovaSacola,
-    carregarSacolas // Adicionado aqui para o useEffect conseguir acessar!
+    carregarSacolas,
+    mostrarSacolasAtivas,
+    setMostrarSacolasAtivas,
+    mostrarSacolasOcultas,
+    setMostrarSacolasOcultas
   } = useSacolas({ obterCoresSelecionadasDoMaterial: cores.obterCoresSelecionadasDoMaterial });
 
   useEffect(() => {
@@ -106,6 +111,14 @@ export default function Painel() {
             enum_.setModalEnumAberto(true);
           }}
         />
+
+<FiltrosSacola
+mostrarAtivas={mostrarSacolasAtivas}
+setMostrarAtivas={setMostrarSacolasAtivas}
+mostrarOcultas={mostrarSacolasOcultas}
+setMostrarOcultas={setMostrarSacolasOcultas}
+onAbrirNovaSacola={handleAbrirNovaSacola}
+/>
 
 <TabelaSacolas 
   sacolasFiltradas={sacolasFiltradas} 
