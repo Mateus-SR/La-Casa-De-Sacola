@@ -3,6 +3,8 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import { useState } from "react";
 import { TrashIcon } from "@radix-ui/react-icons";
 
 export default function EditarCoresDialog({
@@ -16,6 +18,16 @@ export default function EditarCoresDialog({
   onExcluirCor,
   cores,
 }) {
+  const [corEmExclusao, setCorEmExclusao] = useState(null);
+
+  const handleConfirmarExclusao = async () => {
+    if (!corEmExclusao) return;
+
+    const corParaExcluir = corEmExclusao;
+    setCorEmExclusao(null);
+    await onExcluirCor(corParaExcluir);
+  };
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -73,7 +85,7 @@ export default function EditarCoresDialog({
                     <button
                       type="button"
                       className="ml-auto p-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition"
-                      onClick={() => onExcluirCor(cor)}
+                      onClick={() => setCorEmExclusao(cor)}
                       aria-label={`Excluir cor ${cor.nome}`}
                       title={`Excluir cor ${cor.nome}`}
                     >
@@ -88,6 +100,74 @@ export default function EditarCoresDialog({
           <Dialog.Close asChild>
             <button className="absolute top-5 right-5 text-gray-400 hover:text-black font-bold text-lg transition">✕</button>
           </Dialog.Close>
+
+          <AlertDialog.Root
+            open={!!corEmExclusao}
+            onOpenChange={(aberto) => {
+              if (!aberto) setCorEmExclusao(null);
+            }}
+          >
+            <AlertDialog.Portal>
+              <AlertDialog.Overlay className="bg-black/45 fixed inset-0 z-[190] backdrop-blur-sm" />
+              <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-2xl shadow-2xl w-[min(92vw,32rem)] z-[200] outline-none border border-[#e4f4ed]">
+                <div className="flex items-start gap-4 mb-5">
+                  <div className="bg-[#f0faf5] text-[#3ca779] rounded-2xl p-3 border border-[#d7efe3]">
+                    <TrashIcon className="size-5" />
+                  </div>
+
+                  <div className="flex-1">
+                    <AlertDialog.Title className="text-xl font-extrabold text-[#264f41] leading-tight">
+                      Excluir cor do catálogo?
+                    </AlertDialog.Title>
+                    <AlertDialog.Description className="text-sm text-gray-600 mt-2 leading-relaxed">
+                      A cor{' '}
+                      <span className="font-bold text-[#264f41]">
+                        {corEmExclusao?.nome}
+                      </span>
+                      {corEmExclusao?.hex ? (
+                        <>
+                          {' '}
+                          <span className="inline-flex items-center gap-2">
+                            <span
+                              className="inline-block w-3 h-3 rounded-full border border-gray-300"
+                              style={{ backgroundColor: corEmExclusao.hex }}
+                              aria-hidden
+                            />
+                            <span className="font-mono text-xs text-gray-500">{corEmExclusao.hex}</span>
+                          </span>
+                        </>
+                      ) : null}{' '}
+                      será removida do painel e deixará de aparecer nas seleções disponíveis.
+                    </AlertDialog.Description>
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-[#f4f7f5] border border-[#e4f4ed] p-4 mb-6">
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Ação permanente</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Depois de excluir, você poderá cadastrar essa cor novamente, se precisar.
+                  </p>
+                </div>
+
+                <div className="flex gap-3 justify-end">
+                  <AlertDialog.Cancel asChild>
+                    <button className="px-4 py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition outline-none">
+                      Cancelar
+                    </button>
+                  </AlertDialog.Cancel>
+
+                  <AlertDialog.Action asChild>
+                    <button
+                      onClick={handleConfirmarExclusao}
+                      className="px-4 py-3 rounded-xl font-bold text-white bg-[#d94f4f] hover:bg-[#c74242] transition outline-none shadow-sm"
+                    >
+                      Sim, excluir
+                    </button>
+                  </AlertDialog.Action>
+                </div>
+              </AlertDialog.Content>
+            </AlertDialog.Portal>
+          </AlertDialog.Root>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

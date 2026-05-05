@@ -158,9 +158,8 @@ export async function salvarCoresNoBanco(idTipoMaterial, arrayDeCoresSelecionada
     }
 
     return { ok: true };
-  } catch (error) {
-    // Melhoramos o log para forçar a exibição da mensagem de erro real do Supabase
-    console.error("Erro ao persistir cores:", err.message || JSON.stringify(err));
-    return { ok: false, error: err };
-  }
+   }catch (error) {
+  console.error("Erro ao persistir cores:", error.message || JSON.stringify(error));
+  return { ok: false, error: error };
+}
 }

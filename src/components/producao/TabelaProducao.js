@@ -22,7 +22,8 @@ export default function TabelaProducao({ dados, onAbrirDetalhes, handleAlterarSt
               <th className="p-4 font-semibold text-sm">ID Pedido</th>
               <th className="p-4 font-semibold text-sm text-center">Quantidade</th>
               <th className="p-4 font-semibold text-sm text-center">Preço Total (R$)</th>
-              <th className="p-4 font-semibold text-sm text-center">Cliente</th>
+
+              <th className="p-4 font-semibold text-sm text-center">Status</th>
               <th className="p-4 font-semibold text-sm text-center">Ações</th>
             </tr>
           </thead>
@@ -31,19 +32,20 @@ export default function TabelaProducao({ dados, onAbrirDetalhes, handleAlterarSt
               <tr key={pedido.id_ped} className="hover:bg-[#f0faf5] transition">
                 <td className="p-4 font-bold text-[#264f41] max-w-[250px] truncate">#{pedido.id_ped}</td>
                 <td className="p-4 text-center">{pedido.itens_pedido.quantidade}</td>
-                <td className="p-4 text-center">R$ {Number(pedido.itens_pedido.preco).toFixed(2)}</td>
-                <td className="p-4 text-center hover:underline hover:cursor-pointer"
-                    onClick={() => handleDetalhesCliente(pedido)}>
-                        {pedido.usu_uuid}</td>
-                <td className="p-4 text-center flex gap-5 justify-center">
-                    <button 
+                <td className="p-4 text-center">R$ {(pedido.valor_total)}</td>
+                <td className="p-4 text-center">{pedido.status_ped}</td>
+                <td className="p-4 text-center">
+                  <div className="flex gap-5 justify-center">
+                  <button 
                         onClick={() => onAbrirDetalhes(pedido)}
                         className="text-blue-600 hover:bg-white p-2 rounded-lg transition inline-flex items-center gap-1 font-bold">
                         Abrir Detalhes
-                    </button>
+                    </button> 
+
                         <button onClick={() => handleAlterarStatus(pedido)} className="text-blue-600 hover:bg-white p-2 rounded-lg transition inline-flex items-center gap-1 font-bold">
                           <Pencil2Icon/> Editar
                         </button>
+                  </div>
                 </td>
               </tr>
             ))}
