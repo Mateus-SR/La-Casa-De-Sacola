@@ -90,8 +90,7 @@ export function useEnum({
     if (jaExiste) {
       toastPainel(
         "error",
-        `Esse ${enumAtual === "tipo" ? "material" : "tamanho"} já existe`,
-        "Escolha outro nome para continuar o cadastro."
+        `${enumAtual === "tipo" ? "Material" : "Tamanho"} já existe.`
       );
       return;
     }
@@ -103,11 +102,7 @@ export function useEnum({
 
     if (error) {
       console.error("Erro ao adicionar na tabela:", error);
-      toastPainel(
-        "error",
-        "Não foi possível cadastrar o material",
-        "Tente novamente em instantes."
-      );
+      toastPainel("error", `Falha ao cadastrar ${enumAtual === "tipo" ? "material" : "tamanho"}.`);
     } else {
       if (enumAtual === "tipo" && data && data.length > 0) {
         const idNovoMaterial = data[0].id_tip;
@@ -133,10 +128,7 @@ export function useEnum({
 
       toastPainel(
         "success",
-        `${enumAtual === "tipo" ? "Material" : "Tamanho"} cadastrado`,
-        `O novo ${
-          enumAtual === "tipo" ? "material" : "tamanho"
-        } foi salvo com sucesso.`
+        `${enumAtual === "tipo" ? "Material cadastrado" : "Tamanho cadastrado."}`
       );
     }
   };
@@ -152,11 +144,17 @@ export function useEnum({
 
     if (error) {
       console.error("Erro ao ocultar:", error);
+      toastPainel("error", `Falha ao excluir ${enumAtual === "tipo" ? "material" : "tamanho"}.`);
     } else {
       await carregarFiltros();
       setModalEnumAberto(false);
       setEnumEditandoId(null);
       setNovoValorEnum("");
+
+      toastPainel(
+        "success",
+        `${enumAtual === "tipo" ? "Material excluído" : "Tamanho excluído."}`
+      );
     }
   };
 
@@ -176,11 +174,7 @@ export function useEnum({
 
     if (error) {
       console.error("Erro ao editar na tabela:", error);
-      toastPainel(
-        "error",
-        "Não foi possível atualizar",
-        "O item não pôde ser salvo no momento."
-      );
+      toastPainel("error", `Falha ao atualizar ${enumAtual === "tipo" ? "material" : "tamanho"}.`);
     } else {
       if (enumAtual === "tipo") {
         const materialChave = novoValorEnum.trim().toLowerCase();
@@ -203,10 +197,7 @@ export function useEnum({
 
       toastPainel(
         "success",
-        `${enumAtual === "tipo" ? "Material" : "Tamanho"} atualizado`,
-        `As alterações em ${
-          enumAtual === "tipo" ? "material" : "tamanho"
-        } foram salvas com sucesso.`
+        `${enumAtual === "tipo" ? "Material atualizado" : "Tamanho atualizado."}`
       );
     }
   };
