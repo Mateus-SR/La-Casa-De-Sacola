@@ -111,6 +111,8 @@ export function useCoresMaterial({ carregarFiltros = () => {} } = {}) {
         [resultado.materialNormalizado]: resultado.coresDoMaterialAtualizadas,
       }));
     }
+
+    toast.success("Cor excluída.");
   };
 
   const resetFormularioCor = () => {
@@ -127,11 +129,8 @@ export function useCoresMaterial({ carregarFiltros = () => {} } = {}) {
       coresPorMaterial,
     });
 
-    if (!resultado.ok) {
-      toast.error(
-        resultado.mensagem ||
-          "Não foi possível salvar a cor. Verifique os dados informados e tente novamente."
-      );
+     if (!resultado.ok) {
+       toast.error(resultado.mensagem || "Falha ao salvar cor.");
       return;
     }
 
@@ -162,12 +161,7 @@ export function useCoresMaterial({ carregarFiltros = () => {} } = {}) {
     setNovaCorNome("");
     setNovaCorHex("#000000");
 
-    toast.success(
-      "Cor cadastrada com sucesso. " +
-        (resultado.tipo === "principal"
-          ? "A nova cor foi adicionada à lista principal do painel."
-          : "A nova cor foi vinculada ao material selecionado.")
-    );
+    toast.success("Cor adicionada.");
   };
 
   return {

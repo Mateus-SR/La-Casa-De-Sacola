@@ -23,8 +23,8 @@ export default function Painel() {
   const router = useRouter();
 
   // O toast precisa ser declarado ANTES do useEnum, pois o hook usa ele
-  const toastPainel = (variant, title, description) => {
-    const mensagem = description ? `${title}: ${description}` : title;
+  const toastPainel = (variant, title /* description intentionally ignored for panel toasts */) => {
+    const mensagem = title;
 
     if (variant === "error") {
       toast.error(mensagem);
