@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { TrashIcon, PlusIcon, MinusIcon, ChevronLeftIcon } from "@radix-ui/react-icons";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function CarrinhoPage() {
@@ -202,8 +202,6 @@ const finalizarCompra = async () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f4f7f5]">
-      <Toaster position="bottom-right" />
-
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

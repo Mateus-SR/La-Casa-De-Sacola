@@ -1,5 +1,6 @@
 import '@/app/css/globals.css';
 import Navbar from "@/components/layout/Navbar";
+import AppToaster from "@/components/layout/AppToaster";
 import { CartProvider } from '@/context/CartContext';
 
 export const metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
       </head>
       <body style={{ fontFamily: "'Manrope', sans-serif" }} className='custom-scrollbar'>
         <CartProvider>
+          <AppToaster />
           <Navbar/>
           {children}
         </CartProvider>

@@ -1,4 +1,5 @@
 import '@/app/css/globals.css';
+import AppToaster from "@/components/layout/AppToaster";
 
 export const metadata = {
   title: 'La Casa de Sacola — Sacolas Personalizadas',
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
         <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" />
       </head>
       <body style={{ fontFamily: "'Manrope', sans-serif" }} className='custom-scrollbar'>
+        <AppToaster />
         {children}
       </body>
     </html>
