@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ChevronLeftIcon, ChevronRightIcon, MixerHorizontalIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useCart } from "@/context/CartContext";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 export default function ProdutosModelos() {
   const [produtos, setProdutos] = useState([]);
@@ -113,8 +113,6 @@ export default function ProdutosModelos() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Toaster position="bottom-right" />
-
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
         <div className="text-center mb-16">
           <span className="inline-block bg-[#f0faf5] text-[#3ca779] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
@@ -248,15 +246,7 @@ export default function ProdutosModelos() {
                     <button 
                       onClick={() => {
                         addToCart(produto);
-                        toast.success(`${produto.nome_sac} adicionado ao carrinho!`, {
-                          style: {
-                            borderRadius: '16px',
-                            background: '#264f41',
-                            color: '#fff',
-                            fontFamily: 'Quicksand, sans-serif',
-                            fontWeight: 'bold'
-                          },
-                        });
+                        toast.success(`${produto.nome_sac} adicionado ao carrinho!`);
                       }}
                       className="bg-[#3ca779] hover:bg-[#2e8f65] text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-[#3ca779]/30 hover:shadow-[#3ca779]/50 active:scale-95 flex items-center gap-2"
                     >

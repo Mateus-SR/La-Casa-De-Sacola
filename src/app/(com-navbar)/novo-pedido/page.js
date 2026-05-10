@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import CriadorDeSacola from "@/components/pedidos/criadorSacola";
 import { useCart } from "@/context/CartContext";
 import { TrashIcon, PlusIcon, MinusIcon, ChevronLeftIcon, ArchiveIcon } from "@radix-ui/react-icons";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function novoPedido() {
@@ -74,8 +74,6 @@ export default function novoPedido() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f4f7f5]">
-      <Toaster position="bottom-right" />
-
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

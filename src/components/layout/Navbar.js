@@ -8,7 +8,7 @@ import {
   UpdateIcon
 } from "@radix-ui/react-icons";
 import { useCart } from "../../context/CartContext";
-import toast,{ Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import useNavbarAuth from "../../hooks/loginAuthNavbar"; 
 import ToastErroAuth, { opcoesErroAuth } from "./loginToastNavbar";
 
@@ -60,7 +60,6 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-[#f4f7f5] shadow-sm border-b border-[#e4f4ed]">
       {/* Top bar */}
-      {/* <Toaster position="top-right" /> */}
       <div className="bg-[#292622] text-white text-xs py-1.5 text-center font-medium tracking-wide">
          Frete grátis para pedidos acima de R$500 &nbsp;|&nbsp; La Casa de Sacola
       </div>

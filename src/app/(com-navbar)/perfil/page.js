@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import Footer from "@/components/layout/Footer";
 import {
@@ -98,8 +98,6 @@ export default function PerfilPage() {
 
   return (
     <div className="min-h-screen bg-[#eef5ee] flex flex-col text-[#264f41] relative overflow-hidden">
-      <Toaster position="top-right" />
-
       <main className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-[linear-gradient(140deg,#f6fbf6_0%,#e8f6ea_20%,#d8eddc_42%,#c7e7cd_66%,#A8DCAB_100%)]" />
