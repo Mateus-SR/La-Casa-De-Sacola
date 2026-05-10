@@ -48,9 +48,19 @@ export default function PerfilPage() {
 
       const dadosSalvos = window.localStorage.getItem(`${STORAGE_PREFIX}:${user.id}`);
       const perfilLocal = dadosSalvos ? JSON.parse(dadosSalvos) : null;
+      const { data: usuarioBanco } = await supabase
+        .from("usuario")
+        .select("nome_usu")
+        .eq("uuid_usu", user.id)
+        .maybeSingle();
 
       setDadosConta({
-        nome: user.user_metadata?.full_name || perfilLocal?.nome || user.email?.split("@")[0] || "Seu perfil",
+        nome:
+          usuarioBanco?.nome_usu ||
+          user.user_metadata?.full_name ||
+          perfilLocal?.nome ||
+          user.email?.split("@")[0] ||
+          "Seu perfil",
         email: perfilLocal?.email || user.email || "",
         telefone: perfilLocal?.telefone || "",
       });
@@ -104,12 +114,43 @@ export default function PerfilPage() {
 
     setSalvando(true);
 
+    const nomeLimpo = dadosConta.nome.trim();
+    const telefoneLimpo = dadosConta.telefone.trim();
+
     const payload = {
-      nome: dadosConta.nome.trim(),
+      nome: nomeLimpo,
       email: dadosConta.email.trim(),
-      telefone: dadosConta.telefone.trim(),
+      telefone: telefoneLimpo,
       ultimaAtualizacao: new Date().toISOString(),
     };
+
+    const [authResult, bancoResult] = await Promise.all([
+      supabase.auth.updateUser({
+        data: {
+          full_name: nomeLimpo,
+        },
+      }),
+      supabase
+        .from("usuario")
+        .upsert(
+          {
+            uuid_usu: user?.id,
+            nome_usu: nomeLimpo,
+            email_usu: payload.email,
+          },
+          { onConflict: "uuid_usu" }
+        ),
+    ]);
+
+    if (authResult.error || bancoResult.error) {
+      console.error("Erro ao salvar perfil:", {
+        authError: authResult.error,
+        bancoError: bancoResult.error,
+      });
+      toast.error("Não foi possível salvar o nome no sistema.");
+      setSalvando(false);
+      return;
+    }
 
     if (storageKey) {
       window.localStorage.setItem(storageKey, JSON.stringify(payload));
