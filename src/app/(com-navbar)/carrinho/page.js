@@ -22,6 +22,7 @@ const { cartItems, removeFromCart, updateQuantity, cartCount, clearCart } = useC
 
   const [enderecosSalvos, setEnderecosSalvos] = useState([]);
   const [mostrarDropdownCep, setMostrarDropdownCep] = useState(false);
+  const [metodoPagamento, setMetodoPagamento] = useState("pix");
   
   useEffect(() => {
     const checkAccess = async () => {
@@ -140,35 +141,36 @@ const calcularFrete = async () => {
 const finalizarCompra = async () => {
   setLoading(true);
   try {
-    // 1. Obtém o usuário de forma segura
+    // 1. Validar usuário logado
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
     if (userError || !user) {
-      throw new Error("Sessão expirada. Faça login novamente.");
+      throw new Error("Sessão expirada. Por favor, faça login novamente.");
     }
 
-    // 2. Cria o registro do pedido
-    // Verifique se as colunas 'uuid_usu', 'valor_total' e 'status' existem exatamente com esses nomes
+    // 2. Criar o registro na tabela 'pedido'
+    // Usando exatamente os nomes das colunas vistos na sua imagem
     const { data: pedido, error: pedidoError } = await supabase
       .from("pedido")
       .insert({
-        usu_uuid: user.id,
-        valor_total: total,
-        status_ped: "pendente"
+        usu_uuid: user.id,          // UUID do utilizador logado
+        valor_total: total,         // Calculado (subtotal + frete)
+        status_ped: "pendente",     // Conforme sua correção no Ledger
+        metodo_pagamento: metodoPagamento, // pix, cartao ou boleto
+        cep_entrega: cep            // Guardando o CEP usado no cálculo do frete
       })
       .select()
       .single();
 
     if (pedidoError) {
-      console.error("Erro na tabela pedido:", pedidoError);
+      console.error("Erro ao criar pedido:", pedidoError);
       throw new Error(`Erro no pedido: ${pedidoError.message}`);
     }
 
-    // 3. Cria os itens do pedido
-    // Verifique se a chave primária da sua tabela pedido é 'id' ou 'id_pedido'
+    // 3. Criar os registros na tabela 'itens_pedido'
+    // Relacionando cada item do carrinho ao ID do pedido gerado acima
     const itens = cartItems.map((item) => ({
-      ped_id: pedido.id_ped, 
-      sac_id: item.id_sac,
+      ped_id: pedido.id_ped,        // Chave estrangeira para a tabela pedido
+      sac_id: item.id_sac,         // ID do modelo da sacola
       quantidade: item.quantity,
       preco: item.precounitario_sac,
       cor_id: item.cor_id
@@ -177,23 +179,24 @@ const finalizarCompra = async () => {
     const { error: itensError } = await supabase.from("itens_pedido").insert(itens);
 
     if (itensError) {
-      console.error("Erro na tabela item_pedido:", itensError);
+      console.error("Erro ao inserir itens:", itensError);
       throw new Error(`Erro nos itens: ${itensError.message}`);
     }
 
-    // 4. Sucesso e Limpeza
-    clearCart();
-    toast.success("Pedido realizado com sucesso!");
+    // 4. Sucesso, Limpeza e Redirecionamento
+    clearCart(); // Limpa o localStorage via Context
+    toast.success("Pedido finalizado com sucesso!");
+    
+    // Encaminha para a página de acompanhamento de pedidos
     router.push("/pedidos"); 
 
   } catch (error) {
-    console.error("Erro detalhado:", error);
-    toast.error(error.message || "Erro ao finalizar o pedido.");
+    console.error("Erro no checkout:", error);
+    toast.error(error.message || "Não foi possível finalizar a compra.");
   } finally {
     setLoading(false);
   }
 };
-
   // Enquanto verifica o login/tipo de usuário, exibe um estado de carregamento ou nada
   if (loading) return null; 
 
@@ -398,6 +401,27 @@ const finalizarCompra = async () => {
                     </div>
                   </div>
 
+<div className="mb-6">
+  <h4 className="text-sm font-bold text-[#264f41] mb-3">Forma de Pagamento</h4>
+  <div className="grid grid-cols-1 gap-2">
+    {['pix', 'cartao', 'boleto'].map((metodo) => (
+      <label key={metodo} className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${metodoPagamento === metodo ? 'border-[#3ca779] bg-[#f0faf5]' : 'border-[#e4f4ed] hover:border-[#c8e3d5]'}`}>
+        <div className="flex items-center gap-3">
+          <input
+            type="radio"
+            name="pagamento"
+            value={metodo}
+            checked={metodoPagamento === metodo}
+            onChange={(e) => setMetodoPagamento(e.target.value)}
+            className="hidden"
+          />
+          <span className="capitalize font-bold text-[#264f41]">{metodo}</span>
+        </div>
+        {metodo === 'pix' && <span className="text-[10px] bg-[#3ca779] text-white px-2 py-0.5 rounded-full">Desconto 5%</span>}
+      </label>
+    ))}
+  </div>
+</div>
                  <button 
   onClick={finalizarCompra}
   disabled={loading || cartItems.length === 0}
