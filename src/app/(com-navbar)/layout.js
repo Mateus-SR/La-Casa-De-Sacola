@@ -2,6 +2,7 @@ import '@/app/css/globals.css';
 import Navbar from "@/components/layout/Navbar";
 import AppToaster from "@/components/layout/AppToaster";
 import { CartProvider } from '@/context/CartContext';
+import Script from 'next/script';
 
 export const metadata = {
   title: 'La Casa de Sacola — Sacolas Personalizadas',
@@ -25,6 +26,11 @@ export default function RootLayout({ children }) {
           <Navbar/>
           {children}
         </CartProvider>
+        <Script
+          src="https://cdn.userway.org/widget.js"
+          data-account="2F8cKg0ZVn"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
