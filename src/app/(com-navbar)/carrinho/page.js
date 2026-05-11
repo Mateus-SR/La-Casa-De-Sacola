@@ -139,24 +139,37 @@ const calcularFrete = async () => {
 };
 
 const finalizarCompra = async () => {
+  // 1. Validações Iniciais (Trava de segurança para o frete)
+  if (!tipoFrete) {
+    toast.error("Por favor, selecione uma opção de frete (Correios ou A combinar).");
+    return;
+  }
+
+  if (tipoFrete === "correios" && valorFrete === 0) {
+    toast.error("Por favor, insira um CEP e calcule o frete antes de finalizar.");
+    return;
+  }
+
   setLoading(true);
+
   try {
-    // 1. Validar usuário logado
+    // 2. Validar usuário logado
     const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
     if (userError || !user) {
       throw new Error("Sessão expirada. Por favor, faça login novamente.");
     }
 
-    // 2. Criar o registro na tabela 'pedido'
-    // Usando exatamente os nomes das colunas vistos na sua imagem
+    // 3. Criar o registro na tabela 'pedido'
+    // Utilizando as colunas da sua tabela: usu_uuid e status_ped
     const { data: pedido, error: pedidoError } = await supabase
       .from("pedido")
       .insert({
-        usu_uuid: user.id,          // UUID do utilizador logado
-        valor_total: total,         // Calculado (subtotal + frete)
-        status_ped: "pendente",     // Conforme sua correção no Ledger
-        metodo_pagamento: metodoPagamento, // pix, cartao ou boleto
-        cep_entrega: cep            // Guardando o CEP usado no cálculo do frete
+        usu_uuid: user.id,          
+        valor_total: total,         
+        status_ped: "pendente",     
+        metodo_pagamento: metodoPagamento, 
+        cep_entrega: cep            
       })
       .select()
       .single();
@@ -166,11 +179,11 @@ const finalizarCompra = async () => {
       throw new Error(`Erro no pedido: ${pedidoError.message}`);
     }
 
-    // 3. Criar os registros na tabela 'itens_pedido'
-    // Relacionando cada item do carrinho ao ID do pedido gerado acima
+    // 4. Criar os registros na tabela 'itens_pedido'
+    // Vinculando cada item do carrinho ao id_ped gerado
     const itens = cartItems.map((item) => ({
-      ped_id: pedido.id_ped,        // Chave estrangeira para a tabela pedido
-      sac_id: item.id_sac,         // ID do modelo da sacola
+      ped_id: pedido.id_ped,        
+      sac_id: item.id_sac,         
       quantidade: item.quantity,
       preco: item.precounitario_sac,
       cor_id: item.cor_id
@@ -183,8 +196,8 @@ const finalizarCompra = async () => {
       throw new Error(`Erro nos itens: ${itensError.message}`);
     }
 
-    // 4. Sucesso, Limpeza e Redirecionamento
-    clearCart(); // Limpa o localStorage via Context
+    // 5. Sucesso, Limpeza e Redirecionamento
+    clearCart(); // Limpa o estado e o localStorage
     toast.success("Pedido finalizado com sucesso!");
     
     // Encaminha para a página de acompanhamento de pedidos
@@ -424,8 +437,9 @@ const finalizarCompra = async () => {
 </div>
                  <button 
   onClick={finalizarCompra}
-  disabled={loading || cartItems.length === 0}
-  className="w-full bg-[#264f41] hover:bg-[#1a362c] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-[#264f41]/20 mb-4 disabled:opacity-50"
+  // O botão fica desabilitado se estiver carregando, se o carrinho estiver vazio OU se não houver frete definido
+  disabled={loading || cartItems.length === 0 || !tipoFrete || (tipoFrete === "correios" && valorFrete === 0)}
+  className="w-full bg-[#264f41] hover:bg-[#1a362c] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-[#264f41]/20 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
 >
   {loading ? "Processando..." : "Finalizar Compra"}
 </button>
