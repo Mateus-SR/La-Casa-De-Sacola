@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { toast } from "react-hot-toast";
 import {
@@ -368,23 +368,11 @@ const fetchDadosIniciais = async () => {
                   Mínimo de {sacolaSelecionada.quantidademin_sac} unidades para este modelo.
                 </p>
               )}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setQuantidade((q) => Math.max(sacolaSelecionada?.quantidademin_sac || 1, q - 1))}
-                  className="w-10 h-10 rounded-xl bg-[#e4f4ed] hover:bg-[#c8e3d5] text-[#264f41] flex items-center justify-center transition-all"
-                >
-                  <MinusIcon />
-                </button>
-                <span className="text-2xl font-extrabold text-[#264f41] w-16 text-center">
-                  {quantidade}
-                </span>
-                <button
-                  onClick={() => setQuantidade((q) => q + 1)}
-                  className="w-10 h-10 rounded-xl bg-[#e4f4ed] hover:bg-[#c8e3d5] text-[#264f41] flex items-center justify-center transition-all"
-                >
-                  <PlusIcon />
-                </button>
-              </div>
+              <QuantidadeInput
+                valor={quantidade}
+                onChange={setQuantidade}
+                min={sacolaSelecionada?.quantidademin_sac || 1}
+              />
             </div>
 
             {/* Cores do logo */}
@@ -533,6 +521,77 @@ function RevisaoLinha({ label, valor }) {
     <div className="flex justify-between items-center py-3 px-4 bg-[#f9fdfa] rounded-xl border border-[#e4f4ed]">
       <span className="text-sm text-[#6b9e8a] font-semibold">{label}</span>
       <span className="text-sm text-[#264f41] font-bold">{valor}</span>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Componente de input de quantidade com repetição ao segurar
+// ---------------------------------------------------------------------------
+function QuantidadeInput({ valor, onChange, min }) {
+  const intervaloRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const step = min >= 1000 ? 100 : min >= 100 ? 10 : 1;
+
+  const ajustar = (delta) => {
+    onChange((q) => Math.max(min, q + delta));
+  };
+
+  const iniciarRepeticao = (delta) => {
+    ajustar(delta);
+    timeoutRef.current = setTimeout(() => {
+      intervaloRef.current = setInterval(() => ajustar(delta), 50);
+    }, 300);
+  };
+
+  const pararRepeticao = () => {
+    clearTimeout(timeoutRef.current);
+    clearInterval(intervaloRef.current);
+  };
+
+  const handleInputChange = (e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, '');
+    if (raw === '') {
+      onChange(min);
+      return;
+    }
+    onChange(Number(raw));
+  };
+
+  const handleBlur = () => {
+    if (valor < min) onChange(min);
+  };
+
+  return (
+    <div className="flex items-center gap-4">
+      <button
+        onMouseDown={() => iniciarRepeticao(-step)}
+        onMouseUp={pararRepeticao}
+        onMouseLeave={pararRepeticao}
+        onTouchStart={() => iniciarRepeticao(-step)}
+        onTouchEnd={pararRepeticao}
+        className="w-10 h-10 rounded-xl bg-[#e4f4ed] hover:bg-[#c8e3d5] text-[#264f41] flex items-center justify-center transition-all select-none"
+      >
+        <MinusIcon />
+      </button>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={valor}
+        onChange={handleInputChange}
+        onBlur={handleBlur}
+        className="text-2xl font-extrabold text-[#264f41] w-24 text-center bg-transparent border border-[#e4f4ed] rounded-xl py-1 px-2 focus:outline-none focus:border-[#3ca779] focus:bg-white transition-all"
+      />
+      <button
+        onMouseDown={() => iniciarRepeticao(step)}
+        onMouseUp={pararRepeticao}
+        onMouseLeave={pararRepeticao}
+        onTouchStart={() => iniciarRepeticao(step)}
+        onTouchEnd={pararRepeticao}
+        className="w-10 h-10 rounded-xl bg-[#e4f4ed] hover:bg-[#c8e3d5] text-[#264f41] flex items-center justify-center transition-all select-none"
+      >
+        <PlusIcon />
+      </button>
     </div>
   );
 }
