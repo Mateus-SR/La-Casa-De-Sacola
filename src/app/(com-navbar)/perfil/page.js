@@ -3,10 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import Footer from "@/components/layout/Footer";
-import ProductSelectionModal from "@/components/pedidos/ProductSelectionModal";
 import {
   ChevronRightIcon,
   EnvelopeIcon,
@@ -14,7 +13,6 @@ import {
   PhoneIcon,
   ShoppingBagIcon,
   UserCircleIcon,
-  StarIcon,
 } from "@heroicons/react/24/outline";
 
 const STORAGE_PREFIX = "lcs-perfil";
@@ -23,7 +21,6 @@ export default function PerfilPage() {
   const router = useRouter();
   const [carregando, setCarregando] = useState(true);
   const [user, setUser] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [dadosConta, setDadosConta] = useState({
     nome: "",
     email: "",
@@ -176,14 +173,6 @@ export default function PerfilPage() {
 
   return (
     <div className="min-h-screen bg-[#eef5ee] flex flex-col text-[#264f41] relative overflow-hidden">
-      <Toaster position="top-right" />
-      
-      {/* Modal de Seleção de Produto */}
-      <ProductSelectionModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
-
       <main className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-[linear-gradient(140deg,#f6fbf6_0%,#e8f6ea_20%,#d8eddc_42%,#c7e7cd_66%,#A8DCAB_100%)]" />
@@ -278,22 +267,6 @@ export default function PerfilPage() {
                     </div>
                   </Link>
 
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="group text-left rounded-[1.75rem] border border-[#d48a2f] bg-white p-5 sm:p-6 shadow-[0_14px_30px_rgba(38,79,65,0.06)] hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(38,79,65,0.1)] transition-all"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="w-12 h-12 rounded-2xl bg-[#d48a2f]/20 flex items-center justify-center mb-4">
-                          <StarIcon className="w-6 h-6 text-[#d48a2f]" />
-                        </div>
-                        <h3 className="text-xl font-extrabold">Avaliar Produto</h3>
-                        <p className="mt-2 text-sm text-[#61786b]">Conte-nos o que achou das nossas sacolas.</p>
-                      </div>
-                      <ChevronRightIcon className="w-5 h-5 text-[#b89d61] group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </button>
-
                   <Link
                     href="/enderecos"
                     className="group rounded-[1.75rem] border border-[#e6d8b5] bg-white p-5 sm:p-6 shadow-[0_14px_30px_rgba(38,79,65,0.06)] hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(38,79,65,0.1)] transition-all"
@@ -338,27 +311,16 @@ export default function PerfilPage() {
                     </label>
 
                     <label className="block">
-                      <span className="block text-xs font-black uppercase tracking-widest text-[#7b867b] mb-2">E-mail</span>
-                      <input
-                        type="email"
-                        value={dadosConta.email}
-                        onChange={handleChange("email")}
-                        className="w-full rounded-2xl border border-[#ded7c7] bg-[#fbfaf6] px-4 py-3 outline-none focus:border-[#F2A154] focus:ring-4 focus:ring-[#F2A154]/15 transition"
-                        placeholder="voce@exemplo.com"
-                      />
-                    </label>
-
-                    <label className="block">
                       <span className="block text-xs font-black uppercase tracking-widest text-[#7b867b] mb-2">Telefone</span>
                       <input
                         type="tel"
                         value={dadosConta.telefone}
                         onChange={handleChange("telefone")}
-                        className="w-full rounded-2xl border border-[#ded7c7] bg-[#fbfaf6] px-4 py-3 outline-none focus:border-[#A8DCAB] focus:ring-4 focus:ring-[#A8DCAB]/20 transition"
+                        className={`w-full rounded-2xl border bg-[#fbfaf6] px-4 py-3 outline-none transition ${erroTelefone ? "border-[#d94f4f] focus:border-[#d94f4f] focus:ring-4 focus:ring-[#d94f4f]/15" : "border-[#ded7c7] focus:border-[#A8DCAB] focus:ring-4 focus:ring-[#A8DCAB]/20"}`}
                         placeholder="(11) 99999-9999"
                       />
                       {erroTelefone && (
-                        <p className="mt-1 text-xs text-red-500 font-bold">{erroTelefone}</p>
+                        <p className="text-sm text-[#d94f4f] font-semibold mt-2">{erroTelefone}</p>
                       )}
                     </label>
 

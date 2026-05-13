@@ -1,63 +1,133 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
-  const [cepDestino, setCepDestino] = useState('');
-  const [freteOptions, setFreteOptions] = useState([]);
-  const [freteSelected, setFreteSelected] = useState(null);
-  const [loadingFrete, setLoadingFrete] = useState(false);
+  const [userId, setUserId] = useState(null);
+  
+  // Novo estado que vai servir de "trava de segurança"
+  const [cartOwner, setCartOwner] = useState(null); 
 
+  // 1. Descobre quem está logado
   useEffect(() => {
-    const savedCart = localStorage.getItem("la-casa-cart");
-    if (savedCart) setCartItems(JSON.parse(savedCart));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || "deslogado");
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || "deslogado");
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
+  // 2. Efeito de CARREGAMENTO (Muda de gaveta)
   useEffect(() => {
-    localStorage.setItem("la-casa-cart", JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (!userId) return;
+
+    const storageKey = `la-casa-cart-${userId}`;
+    const savedCart = localStorage.getItem(storageKey);
+    
+    if (savedCart) {
+      try {
+        setCartItems(JSON.parse(savedCart));
+      } catch (error) {
+        console.error("Erro ao carregar o carrinho:", error);
+        setCartItems([]);
+      }
+    } else {
+      setCartItems([]);
+    }
+    
+    // Assim que ele termina de carregar, ele avisa quem é o dono desse novo carrinho
+    setCartOwner(userId);
+  }, [userId]);
+
+  // 3. Efeito de SALVAMENTO
+  useEffect(() => {
+    // A TRAVA: O sistema só salva se o dono do carrinho atual bater com o status do usuário.
+    // Isso impede que os itens da sua conta vazem para a gaveta "deslogado" no momento de sair.
+    if (userId && cartOwner === userId) {
+      const storageKey = `la-casa-cart-${userId}`;
+      if (cartItems.length > 0) {
+        localStorage.setItem(storageKey, JSON.stringify(cartItems));
+      } else {
+        localStorage.removeItem(storageKey);
+      }
+    }
+  }, [cartItems, userId, cartOwner]);
 
   const addToCart = (product) => {
-    setCartItems(prev => {
-      const exists = prev.find(i => i.id_sac === product.id_sac);
-      if (exists) return prev.map(i => i.id_sac === product.id_sac ? {...i, quantity: i.quantity + 1} : i);
-      return [...prev, {...product, quantity: 1}];
+    setCartItems((prevItems) => {
+      // Pega a quantidade configurada no frontend (ex: 999). Se não tiver, assume 1.
+      const quantidadeParaAdicionar = product.quantity || 1;
+
+      // Procura se já existe no carrinho o MESMO modelo com a MESMA cor
+      const existingItem = prevItems.find(
+        (item) => item.id_sac === product.id_sac && item.cor_id === product.cor_id
+      );
+
+      if (existingItem) {
+        // Se já existe, soma as quantidades
+        return prevItems.map((item) =>
+          (item.id_sac === product.id_sac && item.cor_id === product.cor_id)
+            ? { ...item, quantity: item.quantity + quantidadeParaAdicionar }
+            : item
+        );
+      }
+      
+      // Se não existe, adiciona como item novo mantendo a quantidade escolhida
+      return [...prevItems, { ...product, quantity: quantidadeParaAdicionar }];
     });
   };
 
-  const updateQuantity = (id, q) => {
-    if (q <= 0) return setCartItems(prev => prev.filter(i => i.id_sac !== id));
-    setCartItems(prev => prev.map(i => i.id_sac === id ? {...i, quantity: q} : i));
+  const removeFromCart = (productId) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id_sac !== productId));
   };
 
-  const calcularFrete = async (cep) => {
-    setLoadingFrete(true);
-    try {
-      const res = await fetch('/api/frete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cepDestino: cep, produtos: cartItems })
-      });
-      const data = await res.json();
-      setFreteOptions(data);
-      setCepDestino(cep);
-      setFreteSelected(null);
-    } finally {
-      setLoadingFrete(false);
+  const updateQuantity = (productId, quantity) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
     }
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id_sac === productId ? { ...item, quantity } : item
+      )
+    );
   };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{
-      cartItems, addToCart, removeFromCart: (id) => updateQuantity(id, 0), updateQuantity,
-      cartCount: cartItems.reduce((t, i) => t + i.quantity, 0),
-      cepDestino, freteOptions, freteSelected, setFreteSelected, loadingFrete, calcularFrete
-    }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        cartCount,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
 }
 
-export const useCart = () => useContext(CartContext);
+export function useCart() {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart deve ser usado dentro de um CartProvider");
+  }
+  return context;
+}
