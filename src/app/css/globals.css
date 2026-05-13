@@ -26,8 +26,8 @@
 .userway_buttons_wrapper,
 #userwayAccessibilityIcon {
   position: fixed !important;
-  bottom: 8px !important;
-  right: 20px !important;
+  bottom: 5vh !important;
+  right: 2.5vw !important;
   left: auto !important;
   top: auto !important;
   z-index: 99999 !important;
