@@ -1,4 +1,5 @@
 "use client";
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -443,6 +444,35 @@ const finalizarCompra = async () => {
 >
   {loading ? "Processando..." : "Finalizar Compra"}
 </button>
+=======
+import Navbar from "../../../components/layout/Navbar";
+import { useCart } from "../../../context/CartContext";
+import ShippingCalculator from "../../../components/carrinho/ShippingCalculator";
+import { Toaster } from "react-hot-toast";
+
+export default function CarrinhoPage() {
+  const { cartItems, updateQuantity, cartCount, freteSelected } = useCart();
+  const subtotal = cartItems.reduce((acc, i) => acc + i.precounitario_sac * i.quantity, 0);
+  const total = freteSelected ? subtotal + parseFloat(freteSelected.price) : subtotal;
+
+  return (
+    <div className="min-h-screen bg-[#f4f7f5]">
+      <Navbar /><Toaster />
+      <main className="container mx-auto p-8 mt-20">
+        <h1 className="text-3xl font-bold text-[#264f41] mb-8">Meu Carrinho ({cartCount})</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            {cartItems.map(item => (
+              <div key={item.id_sac} className="bg-white p-6 rounded-3xl flex justify-between items-center border border-gray-100">
+                <div>
+                  <p className="font-bold">{item.nome_sac}</p>
+                  <p className="text-sm text-gray-500">R$ {Number(item.precounitario_sac).toFixed(2)}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => updateQuantity(item.id_sac, item.quantity - 1)} className="p-2 bg-gray-100 rounded-lg">-</button>
+                  <span className="font-bold">{item.quantity}</span>
+                  <button onClick={() => updateQuantity(item.id_sac, item.quantity + 1)} className="p-2 bg-gray-100 rounded-lg">+</button>
+>>>>>>> parent of 7986b6e (arrumando os conflitos)
                 </div>
               </div>
             </div>

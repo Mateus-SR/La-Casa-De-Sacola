@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { toast } from "react-hot-toast";
 import { salvarCorNoBanco, excluirCorNoBanco } from "@/services/coresService";
 import {
   adicionarCorLocal,
@@ -111,8 +110,6 @@ export function useCoresMaterial({ carregarFiltros = () => {} } = {}) {
         [resultado.materialNormalizado]: resultado.coresDoMaterialAtualizadas,
       }));
     }
-
-    toast.success("Cor excluída.");
   };
 
   const resetFormularioCor = () => {
@@ -129,8 +126,12 @@ export function useCoresMaterial({ carregarFiltros = () => {} } = {}) {
       coresPorMaterial,
     });
 
-     if (!resultado.ok) {
-       toast.error(resultado.mensagem || "Falha ao salvar cor.");
+    if (!resultado.ok) {
+      toastPainel(
+        "error",
+        "Não foi possível salvar a cor",
+        resultado.mensagem || "Verifique os dados informados e tente novamente."
+      );
       return;
     }
 
@@ -161,7 +162,13 @@ export function useCoresMaterial({ carregarFiltros = () => {} } = {}) {
     setNovaCorNome("");
     setNovaCorHex("#000000");
 
-    toast.success("Cor adicionada.");
+    toastPainel(
+      "success",
+      "Cor cadastrada com sucesso",
+      resultado.tipo === "principal"
+        ? "A nova cor foi adicionada à lista principal do painel."
+        : "A nova cor foi vinculada ao material selecionado."
+    );
   };
 
   return {

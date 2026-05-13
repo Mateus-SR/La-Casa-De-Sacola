@@ -19,17 +19,3 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #2f5546;
 }
-
-/* UserWay Accessibility Widget Positioning */
-
-/* Target only the launcher button and wrapper */
-.userway_buttons_wrapper,
-#userwayAccessibilityIcon {
-  position: fixed !important;
-  bottom: 5vh !important;
-  right: 2.5vw !important;
-  left: auto !important;
-  top: auto !important;
-  z-index: 99999 !important;
-  transform: none !important;
-}

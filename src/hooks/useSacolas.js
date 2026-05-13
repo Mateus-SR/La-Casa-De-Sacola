@@ -135,7 +135,7 @@ export function useSacolas({ obterCoresSelecionadasDoMaterial }) {
         // Passo 4: Fecha a janela do Radix
         setModalAberto(false);
         setSacolaEditandoId(null);
-        toast.success("Sacola atualizada.");
+        toast.success("Sacola atualizada!");
       }
     } else {
       // ---------------- MODO CRIAÇÃO ----------------
@@ -144,12 +144,12 @@ export function useSacolas({ obterCoresSelecionadasDoMaterial }) {
         .insert([sacolaPronta])
         .select();
 
-        if (error) {
+      if (error) {
         console.error("Erro ao criar:", error);
       } else if (data && data[0]) {
         // 👈 Protegemos aqui também para evitar inserir undefined
         setSacolas([...sacolas, data[0]]);
-        toast.success("Sacola cadastrada.");
+        toast.success("Sacola cadastrada!");
       }
 
       setNovaSacola({
@@ -176,7 +176,6 @@ export function useSacolas({ obterCoresSelecionadasDoMaterial }) {
 
     if (error) {
       console.error("Erro ao ocultar sacola:", error);
-      toast.error("Não foi possível excluir a Sacola.");
     } else {
       setSacolas((prevSacolas) =>
         prevSacolas.map((sacola) =>
@@ -187,7 +186,6 @@ export function useSacolas({ obterCoresSelecionadasDoMaterial }) {
       );
       setModalAberto(false);
       setSacolaEditandoId(null);
-      toast.success("Sacola Excluída.");
     }
   };
 

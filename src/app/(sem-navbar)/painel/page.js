@@ -13,25 +13,21 @@ import ModalSacola from "@/components/admin/ModalSacola";
 import ModalGerenciarEnum from "@/components/admin/ModalGerenciarEnum";
 import EditarCoresDialog from "@/components/admin/EditarCoresDialog";
 import FiltrosSacola from "@/components/admin/FiltrosSacola";
+import PainelToast from "@/components/admin/PainelToast";
 
 // Bibliotecas e Utils
 import { useRouter } from 'next/navigation';
 import { useEffect } from "react";
-import { toast } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function Painel() {
   const router = useRouter();
 
   // O toast precisa ser declarado ANTES do useEnum, pois o hook usa ele
-  const toastPainel = (variant, title /* description intentionally ignored for panel toasts */) => {
-    const mensagem = title;
-
-    if (variant === "error") {
-      toast.error(mensagem);
-      return;
-    }
-
-    toast.success(mensagem);
+  const toastPainel = (variant, title, description) => {
+    toast.custom(() => (
+      <PainelToast variant={variant} title={title} description={description} />
+    ));
   };
   
   const cores = useCoresMaterial(); // sem argumento por enquanto
@@ -76,6 +72,7 @@ export default function Painel() {
   return (
     <RotaAdmin>
       <main className="p-5 m-auto bg-gray-100 h-screen flex flex-col">
+        <Toaster position="top-right" />
         <meta charSet="UTF-8" />
         <button onClick={() => router.push('/')} className="bg-[#264f41] hover:bg-[#403c37] text-white px-2.5 py-2.5 rounded-xl font-bold transition shadow-md flex items-left gap-2 text-md lg:text-md w-max mb-5">
           ← Voltar
