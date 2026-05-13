@@ -206,6 +206,10 @@ export default function Navbar() {
                       <Link href="/producao" className="block px-4 py-2 text-sm text-[#8f0000] hover:text-red-700 transition-colors" onClick={() => setDropdownOpen(false)}>
                         Sacolas em Produção
                       </Link>
+
+                      <Link href="/relatorios" className="block px-4 py-2 text-sm text-[#8f0000] hover:text-red-700 transition-colors" onClick={() => setDropdownOpen(false)}>
+                        Relatórios
+                      </Link>
                       </>
                     )}
                     <hr className="my-1 border-[#e4f4ed]" />
@@ -315,6 +319,10 @@ export default function Navbar() {
 
                       <Link href="/producao" className="text-sm font-bold text-[#8f0000] py-2" onClick={() => setMenuOpen(false)}>
                         Sacolas em Produção
+                      </Link>
+
+                      <Link href="/relatorios" className="text-sm font-bold text-[#8f0000] py-2" onClick={() => setMenuOpen(false)}>
+                        Relatórios
                       </Link>
                       </>
                     )}

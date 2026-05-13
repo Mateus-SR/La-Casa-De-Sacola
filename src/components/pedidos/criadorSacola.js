@@ -12,7 +12,6 @@ import {
   ReloadIcon,
 } from "@radix-ui/react-icons";
 
-
 // ---------------------------------------------------------------------------
 // Componente principal
 // ---------------------------------------------------------------------------
@@ -23,18 +22,59 @@ export default function CriadorDeSacola({
   temItens,
   onSacolaAdicionada,
 }) {
-  const [aberto, setAberto]           = useState(false);
-  const [passo, setPasso]             = useState(1);
-  const [sacolas, setSacolas]         = useState([]);
-  const [carregando, setCarregando]   = useState(false);
-  const [salvando, setSalvando]       = useState(false);
+  const [aberto, setAberto] = useState(false);
+  const [passo, setPasso] = useState(1);
+  const [sacolas, setSacolas] = useState([]);
+  const [carregando, setCarregando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
   const [coresDisponiveis, setCoresDisponiveis] = useState([]);
 
   // Seleções do wizard
   const [sacolaSelecionada, setSacolaSelecionada] = useState(null);
-  const [corSelecionada, setCorSelecionada]       = useState(null);
-  const [numCoresLogo, setNumCoresLogo]           = useState(1);
-  const [quantidade, setQuantidade]               = useState(1);
+  const [corSelecionada, setCorSelecionada] = useState(null);
+  const [numCoresLogo, setNumCoresLogo] = useState(1);
+  const [quantidade, setQuantidade] = useState(1);
+
+  const intervaloRefQuant = useRef(null);
+  const timeoutRefQuant = useRef(null);
+
+  const qtdStep = () => {
+    const min = sacolaSelecionada?.quantidademin_sac || 1;
+    return min >= 1000 ? 100 : min >= 100 ? 10 : 1;
+  };
+
+  const qtdIniciarRepeticao = (delta) => {
+    setQuantidade((q) =>
+      Math.max(sacolaSelecionada?.quantidademin_sac || 1, q + delta),
+    );
+    timeoutRefQuant.current = setTimeout(() => {
+      intervaloRefQuant.current = setInterval(() => {
+        setQuantidade((q) =>
+          Math.max(sacolaSelecionada?.quantidademin_sac || 1, q + delta),
+        );
+      }, 50);
+    }, 300);
+  };
+
+  const qtdPararRepeticao = () => {
+    clearTimeout(timeoutRefQuant.current);
+    clearInterval(intervaloRefQuant.current);
+  };
+
+  const qtdHandleInput = (e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    const min = sacolaSelecionada?.quantidademin_sac || 1;
+    if (raw === "") {
+      setQuantidade(min);
+      return;
+    }
+    setQuantidade(Number(raw));
+  };
+
+  const qtdHandleBlur = () => {
+    const min = sacolaSelecionada?.quantidademin_sac || 1;
+    if (quantidade < min) setQuantidade(min);
+  };
 
   // -------------------------------------------------------------------------
   // Busca sacolas ao abrir o wizard
@@ -50,7 +90,7 @@ export default function CriadorDeSacola({
     }
   }, [sacolaSelecionada]);
 
-const fetchDadosIniciais = async () => {
+  const fetchDadosIniciais = async () => {
     setCarregando(true);
     try {
       // 1. Busca Sacolas
@@ -69,7 +109,6 @@ const fetchDadosIniciais = async () => {
         .order("nome_cor", { ascending: true });
       if (errCor) throw errCor;
       setCoresDisponiveis(dataCor || []);
-
     } catch (e) {
       toast.error("Erro ao carregar dados do catálogo.");
     } finally {
@@ -83,13 +122,18 @@ const fetchDadosIniciais = async () => {
   const podeAvancar = () => {
     if (passo === 1) return !!sacolaSelecionada;
     if (passo === 2) return !!corSelecionada;
-    if (passo === 3) return quantidade >= (sacolaSelecionada?.quantidademin_sac || 1);
+    if (passo === 3)
+      return quantidade >= (sacolaSelecionada?.quantidademin_sac || 1);
     if (passo === 4) return true; // logo opcional por enquanto
     return false;
   };
 
-  const avancar = () => { if (podeAvancar()) setPasso((p) => p + 1); };
-  const voltar  = () => { if (passo > 1) setPasso((p) => p - 1); };
+  const avancar = () => {
+    if (podeAvancar()) setPasso((p) => p + 1);
+  };
+  const voltar = () => {
+    if (passo > 1) setPasso((p) => p - 1);
+  };
 
   const resetWizard = () => {
     setPasso(1);
@@ -122,11 +166,11 @@ const fetchDadosIniciais = async () => {
 
       // Insere o item no pedido
       const { error: errItem } = await supabase.from("itens_pedido").insert({
-        ped_id:     idPedido,
-        sac_id:     sacolaSelecionada.id_sac,
+        ped_id: idPedido,
+        sac_id: sacolaSelecionada.id_sac,
         quantidade: quantidade,
-        preco:      sacolaSelecionada.precounitario_sac,
-        cor_id:     corSelecionada.id_cor,
+        preco: sacolaSelecionada.precounitario_sac,
+        cor_id: corSelecionada.id_cor,
       });
       if (errItem) throw errItem;
 
@@ -135,7 +179,7 @@ const fetchDadosIniciais = async () => {
         ...sacolaSelecionada,
         quantity: quantidade,
         cor_sac: corSelecionada.nome_cor, // Garante que a cor apareça no carrinho
-        cor_id: corSelecionada.id_cor
+        cor_id: corSelecionada.id_cor,
       });
       //resetWizard();
       setPasso(6);
@@ -161,7 +205,8 @@ const fetchDadosIniciais = async () => {
             Esse pedido está vazio
           </h2>
           <p className="text-[#6b9e8a] mb-8">
-            Clique no botão abaixo para criar e adicionar sua sacola personalizada.
+            Clique no botão abaixo para criar e adicionar sua sacola
+            personalizada.
           </p>
           <button
             onClick={() => setAberto(true)}
@@ -191,26 +236,34 @@ const fetchDadosIniciais = async () => {
   const IndicadorPassos = () => (
     <div className="flex items-center justify-between mb-8 px-1">
       {PASSOS.map((label, i) => {
-        const num    = i + 1;
-        const ativo  = num === passo;
-        const feito  = num < passo;
+        const num = i + 1;
+        const ativo = num === passo;
+        const feito = num < passo;
         return (
           <div key={num} className="flex items-center gap-2 flex-1">
             <div className="flex flex-col items-center gap-1">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all
-                  ${feito  ? "bg-[#3ca779] text-white"
-                  : ativo  ? "bg-[#264f41] text-white scale-110 shadow-md"
-                           : "bg-[#e4f4ed] text-[#6b9e8a]"}`}
+                  ${
+                    feito
+                      ? "bg-[#3ca779] text-white"
+                      : ativo
+                        ? "bg-[#264f41] text-white scale-110 shadow-md"
+                        : "bg-[#e4f4ed] text-[#6b9e8a]"
+                  }`}
               >
                 {feito ? <CheckIcon className="size-4" /> : num}
               </div>
-              <span className={`text-xs font-semibold hidden sm:block ${ativo ? "text-[#264f41]" : "text-[#6b9e8a]"}`}>
+              <span
+                className={`text-xs font-semibold hidden sm:block ${ativo ? "text-[#264f41]" : "text-[#6b9e8a]"}`}
+              >
                 {label}
               </span>
             </div>
             {i < PASSOS.length - 1 && (
-              <div className={`h-0.5 flex-1 mx-1 rounded transition-all ${feito ? "bg-[#3ca779]" : "bg-[#e4f4ed]"}`} />
+              <div
+                className={`h-0.5 flex-1 mx-1 rounded transition-all ${feito ? "bg-[#3ca779]" : "bg-[#e4f4ed]"}`}
+              />
             )}
           </div>
         );
@@ -235,9 +288,11 @@ const fetchDadosIniciais = async () => {
           onClick={avancar}
           disabled={!podeAvancar()}
           className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all
-            ${podeAvancar()
-              ? "bg-[#3ca779] hover:bg-[#2e8f65] text-white shadow-lg shadow-[#3ca779]/30"
-              : "bg-[#e4f4ed] text-[#b0cfc4] cursor-not-allowed"}`}
+            ${
+              podeAvancar()
+                ? "bg-[#3ca779] hover:bg-[#2e8f65] text-white shadow-lg shadow-[#3ca779]/30"
+                : "bg-[#e4f4ed] text-[#b0cfc4] cursor-not-allowed"
+            }`}
         >
           Próximo <ChevronRightIcon />
         </button>
@@ -248,9 +303,13 @@ const fetchDadosIniciais = async () => {
           className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#264f41] hover:bg-[#1a3a2e] text-white font-bold transition-all shadow-lg disabled:opacity-50"
         >
           {salvando ? (
-            <><ReloadIcon className="animate-spin size-4" /> Salvando...</>
+            <>
+              <ReloadIcon className="animate-spin size-4" /> Salvando...
+            </>
           ) : (
-            <><CheckIcon className="size-4" /> Adicionar ao pedido</>
+            <>
+              <CheckIcon className="size-4" /> Adicionar ao pedido
+            </>
           )}
         </button>
       )}
@@ -267,12 +326,17 @@ const fetchDadosIniciais = async () => {
       {/* PASSO 1 — Escolha da sacola */}
       {passo === 1 && (
         <div>
-          <h3 className="text-xl font-bold text-[#264f41] mb-1">Escolha o tipo de sacola</h3>
-          <p className="text-[#6b9e8a] text-sm mb-6">Selecione o modelo que deseja personalizar.</p>
+          <h3 className="text-xl font-bold text-[#264f41] mb-1">
+            Escolha o tipo de sacola
+          </h3>
+          <p className="text-[#6b9e8a] text-sm mb-6">
+            Selecione o modelo que deseja personalizar.
+          </p>
 
           {carregando ? (
             <div className="flex items-center justify-center py-12 text-[#6b9e8a] gap-3">
-              <ReloadIcon className="animate-spin size-5" /> Carregando sacolas...
+              <ReloadIcon className="animate-spin size-5" /> Carregando
+              sacolas...
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -283,21 +347,32 @@ const fetchDadosIniciais = async () => {
                     key={sac.id_sac}
                     onClick={() => setSacolaSelecionada(sac)}
                     className={`text-left p-5 rounded-2xl border-2 transition-all
-                      ${selecionada
-                        ? "border-[#3ca779] bg-[#f0faf5] shadow-md"
-                        : "border-[#e4f4ed] hover:border-[#a8d5be] hover:bg-[#f9fdfa]"}`}
+                      ${
+                        selecionada
+                          ? "border-[#3ca779] bg-[#f0faf5] shadow-md"
+                          : "border-[#e4f4ed] hover:border-[#a8d5be] hover:bg-[#f9fdfa]"
+                      }`}
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-bold text-[#264f41]">{sac.nome_sac}</p>
-                        <p className="text-sm text-[#6b9e8a] mt-0.5">{sac.tipo_sac}</p>
+                        <p className="font-bold text-[#264f41]">
+                          {sac.nome_sac}
+                        </p>
+                        <p className="text-sm text-[#6b9e8a] mt-0.5">
+                          {sac.tipo_sac}
+                        </p>
                         {sac.tamanho_sac && (
-                          <p className="text-xs text-[#a0bcb2] mt-1">{sac.tamanho_sac}</p>
+                          <p className="text-xs text-[#a0bcb2] mt-1">
+                            {sac.tamanho_sac}
+                          </p>
                         )}
                       </div>
                       <div className="text-right">
                         <p className="font-extrabold text-[#3ca779]">
-                          R$ {Number(sac.precounitario_sac).toFixed(2).replace(".", ",")}
+                          R${" "}
+                          {Number(sac.precounitario_sac)
+                            .toFixed(2)
+                            .replace(".", ",")}
                         </p>
                         <p className="text-xs text-[#a0bcb2]">por unidade</p>
                         {sac.quantidademin_sac && (
@@ -324,8 +399,12 @@ const fetchDadosIniciais = async () => {
       {/* PASSO 2 — Cor da sacola */}
       {passo === 2 && (
         <div>
-          <h3 className="text-xl font-bold text-[#264f41] mb-1">Escolha a cor da sacola</h3>
-          <p className="text-[#6b9e8a] text-sm mb-6">Selecione a cor de fundo da sacola.</p>
+          <h3 className="text-xl font-bold text-[#264f41] mb-1">
+            Escolha a cor da sacola
+          </h3>
+          <p className="text-[#6b9e8a] text-sm mb-6">
+            Selecione a cor de fundo da sacola.
+          </p>
 
           <div className="grid grid-cols-4 gap-4">
             {coresDisponiveis.map((cor) => {
@@ -335,16 +414,22 @@ const fetchDadosIniciais = async () => {
                   key={cor.id_cor}
                   onClick={() => setCorSelecionada(cor)}
                   className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all
-                    ${selecionada
-                      ? "border-[#3ca779] bg-[#f0faf5]"
-                      : "border-[#e4f4ed] hover:border-[#a8d5be]"}`}
+                    ${
+                      selecionada
+                        ? "border-[#3ca779] bg-[#f0faf5]"
+                        : "border-[#e4f4ed] hover:border-[#a8d5be]"
+                    }`}
                 >
                   <div
                     className="w-10 h-10 rounded-full shadow-inner border border-[#e4f4ed]"
                     style={{ backgroundColor: cor.hex_cor }} // Usando hex_cor
                   />
-                  <span className="text-xs font-semibold text-[#264f41]">{cor.nome_cor}</span>
-                  {selecionada && <CheckIcon className="text-[#3ca779] size-3" />}
+                  <span className="text-xs font-semibold text-[#264f41]">
+                    {cor.nome_cor}
+                  </span>
+                  {selecionada && (
+                    <CheckIcon className="text-[#3ca779] size-3" />
+                  )}
                 </button>
               );
             })}
@@ -356,8 +441,12 @@ const fetchDadosIniciais = async () => {
       {/* PASSO 3 — Detalhes: quantidade e cores do logo */}
       {passo === 3 && (
         <div>
-          <h3 className="text-xl font-bold text-[#264f41] mb-1">Detalhes do pedido</h3>
-          <p className="text-[#6b9e8a] text-sm mb-6">Informe a quantidade e as cores do seu logo.</p>
+          <h3 className="text-xl font-bold text-[#264f41] mb-1">
+            Detalhes do pedido
+          </h3>
+          <p className="text-[#6b9e8a] text-sm mb-6">
+            Informe a quantidade e as cores do seu logo.
+          </p>
 
           <div className="space-y-6">
             {/* Quantidade */}
@@ -365,21 +454,48 @@ const fetchDadosIniciais = async () => {
               <p className="font-bold text-[#264f41] mb-1">Quantidade</p>
               {sacolaSelecionada?.quantidademin_sac && (
                 <p className="text-xs text-[#6b9e8a] mb-4">
-                  Mínimo de {sacolaSelecionada.quantidademin_sac} unidades para este modelo.
+                  Mínimo de {sacolaSelecionada.quantidademin_sac} unidades para
+                  este modelo.
                 </p>
               )}
-              <QuantidadeInput
-                valor={quantidade}
-                onChange={setQuantidade}
-                min={sacolaSelecionada?.quantidademin_sac || 1}
-              />
+              <div className="flex items-center gap-4">
+                <button
+                  onMouseDown={() => qtdIniciarRepeticao(-qtdStep())}
+                  onMouseUp={qtdPararRepeticao}
+                  onMouseLeave={qtdPararRepeticao}
+                  onTouchStart={() => qtdIniciarRepeticao(-qtdStep())}
+                  onTouchEnd={qtdPararRepeticao}
+                  className="w-10 h-10 rounded-xl bg-[#e4f4ed] hover:bg-[#c8e3d5] text-[#264f41] flex items-center justify-center transition-all select-none"
+                >
+                  <MinusIcon />
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={quantidade}
+                  onChange={qtdHandleInput}
+                  onBlur={qtdHandleBlur}
+                  className="text-2xl font-extrabold text-[#264f41] w-24 text-center bg-transparent border border-[#e4f4ed] rounded-xl py-1 px-2 focus:outline-none focus:border-[#3ca779] focus:bg-white transition-all"
+                />
+                <button
+                  onMouseDown={() => qtdIniciarRepeticao(qtdStep())}
+                  onMouseUp={qtdPararRepeticao}
+                  onMouseLeave={qtdPararRepeticao}
+                  onTouchStart={() => qtdIniciarRepeticao(qtdStep())}
+                  onTouchEnd={qtdPararRepeticao}
+                  className="w-10 h-10 rounded-xl bg-[#e4f4ed] hover:bg-[#c8e3d5] text-[#264f41] flex items-center justify-center transition-all select-none"
+                >
+                  <PlusIcon />
+                </button>
+              </div>
             </div>
 
             {/* Cores do logo */}
             <div className="bg-[#f9fdfa] rounded-2xl p-5 border border-[#e4f4ed]">
               <p className="font-bold text-[#264f41] mb-1">Cores do logo</p>
               <p className="text-xs text-[#6b9e8a] mb-4">
-                Cada cor adicional representa uma estampagem extra (silk screen).
+                Cada cor adicional representa uma estampagem extra (silk
+                screen).
               </p>
               <div className="flex items-center gap-4">
                 <button
@@ -413,7 +529,9 @@ const fetchDadosIniciais = async () => {
       {/* PASSO 4 — Upload do logo */}
       {passo === 4 && (
         <div>
-          <h3 className="text-xl font-bold text-[#264f41] mb-1">Envie seu logo</h3>
+          <h3 className="text-xl font-bold text-[#264f41] mb-1">
+            Envie seu logo
+          </h3>
           <p className="text-[#6b9e8a] text-sm mb-6">
             Faça o upload do arquivo do seu logo para a sacola.
           </p>
@@ -436,16 +554,21 @@ const fetchDadosIniciais = async () => {
       {/* PASSO 5 — Revisão */}
       {passo === 5 && (
         <div>
-          <h3 className="text-xl font-bold text-[#264f41] mb-1">Revisão da sacola</h3>
+          <h3 className="text-xl font-bold text-[#264f41] mb-1">
+            Revisão da sacola
+          </h3>
           <p className="text-[#6b9e8a] text-sm mb-6">
             Confirme os detalhes antes de adicionar ao pedido.
           </p>
 
           <div className="space-y-3">
-            <RevisaoLinha label="Sacola"    valor={sacolaSelecionada?.nome_sac} />
-            <RevisaoLinha label="Tipo"      valor={sacolaSelecionada?.tipo_sac} />
+            <RevisaoLinha label="Sacola" valor={sacolaSelecionada?.nome_sac} />
+            <RevisaoLinha label="Tipo" valor={sacolaSelecionada?.tipo_sac} />
             {sacolaSelecionada?.tamanho_sac && (
-              <RevisaoLinha label="Tamanho" valor={sacolaSelecionada.tamanho_sac} />
+              <RevisaoLinha
+                label="Tamanho"
+                valor={sacolaSelecionada.tamanho_sac}
+              />
             )}
             <RevisaoLinha
               label="Cor"
@@ -459,14 +582,23 @@ const fetchDadosIniciais = async () => {
                 </span>
               }
             />
-            <RevisaoLinha label="Quantidade"    valor={`${quantidade} unidades`} />
-            <RevisaoLinha label="Cores do logo" valor={`${numCoresLogo} ${numCoresLogo === 1 ? "cor" : "cores"}`} />
+            <RevisaoLinha label="Quantidade" valor={`${quantidade} unidades`} />
+            <RevisaoLinha
+              label="Cores do logo"
+              valor={`${numCoresLogo} ${numCoresLogo === 1 ? "cor" : "cores"}`}
+            />
 
             <div className="mt-4 pt-4 border-t border-[#e4f4ed] flex justify-between items-center">
-              <span className="font-bold text-[#264f41]">Subtotal estimado</span>
+              <span className="font-bold text-[#264f41]">
+                Subtotal estimado
+              </span>
               <span className="text-xl font-extrabold text-[#3ca779]">
                 R${" "}
-                {(sacolaSelecionada?.precounitario_sac * quantidade * (numCoresLogo / 20)) // Esse calculo é completamente fictício e aproximado -Mateus
+                {(
+                  sacolaSelecionada?.precounitario_sac *
+                  quantidade *
+                  (numCoresLogo / 20)
+                ) // Esse calculo é completamente fictício e aproximado -Mateus
                   .toFixed(2)
                   .replace(".", ",")}
               </span>
@@ -477,14 +609,18 @@ const fetchDadosIniciais = async () => {
         </div>
       )}
 
-{/* PASSO 6 — Sucesso e Pergunta */}
+      {/* PASSO 6 — Sucesso e Pergunta */}
       {passo === 6 && (
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-[#f0faf5] rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckIcon className="size-8 text-[#3ca779]" />
           </div>
-          <h3 className="text-2xl font-bold text-[#264f41] mb-2">Sacola adicionada ao carrinho!</h3>
-          <p className="text-[#6b9e8a] mb-8">O que você gostaria de fazer agora?</p>
+          <h3 className="text-2xl font-bold text-[#264f41] mb-2">
+            Sacola adicionada ao carrinho!
+          </h3>
+          <p className="text-[#6b9e8a] mb-8">
+            O que você gostaria de fazer agora?
+          </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -521,77 +657,6 @@ function RevisaoLinha({ label, valor }) {
     <div className="flex justify-between items-center py-3 px-4 bg-[#f9fdfa] rounded-xl border border-[#e4f4ed]">
       <span className="text-sm text-[#6b9e8a] font-semibold">{label}</span>
       <span className="text-sm text-[#264f41] font-bold">{valor}</span>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Componente de input de quantidade com repetição ao segurar
-// ---------------------------------------------------------------------------
-function QuantidadeInput({ valor, onChange, min }) {
-  const intervaloRef = useRef(null);
-  const timeoutRef = useRef(null);
-  const step = min >= 1000 ? 100 : min >= 100 ? 10 : 1;
-
-  const ajustar = (delta) => {
-    onChange((q) => Math.max(min, q + delta));
-  };
-
-  const iniciarRepeticao = (delta) => {
-    ajustar(delta);
-    timeoutRef.current = setTimeout(() => {
-      intervaloRef.current = setInterval(() => ajustar(delta), 50);
-    }, 300);
-  };
-
-  const pararRepeticao = () => {
-    clearTimeout(timeoutRef.current);
-    clearInterval(intervaloRef.current);
-  };
-
-  const handleInputChange = (e) => {
-    const raw = e.target.value.replace(/[^0-9]/g, '');
-    if (raw === '') {
-      onChange(min);
-      return;
-    }
-    onChange(Number(raw));
-  };
-
-  const handleBlur = () => {
-    if (valor < min) onChange(min);
-  };
-
-  return (
-    <div className="flex items-center gap-4">
-      <button
-        onMouseDown={() => iniciarRepeticao(-step)}
-        onMouseUp={pararRepeticao}
-        onMouseLeave={pararRepeticao}
-        onTouchStart={() => iniciarRepeticao(-step)}
-        onTouchEnd={pararRepeticao}
-        className="w-10 h-10 rounded-xl bg-[#e4f4ed] hover:bg-[#c8e3d5] text-[#264f41] flex items-center justify-center transition-all select-none"
-      >
-        <MinusIcon />
-      </button>
-      <input
-        type="text"
-        inputMode="numeric"
-        value={valor}
-        onChange={handleInputChange}
-        onBlur={handleBlur}
-        className="text-2xl font-extrabold text-[#264f41] w-24 text-center bg-transparent border border-[#e4f4ed] rounded-xl py-1 px-2 focus:outline-none focus:border-[#3ca779] focus:bg-white transition-all"
-      />
-      <button
-        onMouseDown={() => iniciarRepeticao(step)}
-        onMouseUp={pararRepeticao}
-        onMouseLeave={pararRepeticao}
-        onTouchStart={() => iniciarRepeticao(step)}
-        onTouchEnd={pararRepeticao}
-        className="w-10 h-10 rounded-xl bg-[#e4f4ed] hover:bg-[#c8e3d5] text-[#264f41] flex items-center justify-center transition-all select-none"
-      >
-        <PlusIcon />
-      </button>
     </div>
   );
 }
