@@ -245,7 +245,7 @@ export default function PerfilPage() {
                         placeholder="(11) 99999-9999"
                       />
                       {erroTelefone && (
-                        <p className="mt-1 text-xs text-red-500 font-bold">{erroTelefone}</p>
+                        <p className="text-sm text-[#d94f4f] font-semibold mt-2">{erroTelefone}</p>
                       )}
                     </label>
 
