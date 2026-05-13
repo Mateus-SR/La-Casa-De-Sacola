@@ -31,6 +31,7 @@ export default function PerfilPage() {
   });
   const [salvando, setSalvando] = useState(false);
   const [ultimoSalvamento, setUltimoSalvamento] = useState(null);
+  const [erroTelefone, setErroTelefone] = useState("");
 
   const storageKey = useMemo(() => {
     if (!user?.id) return null;
@@ -50,9 +51,19 @@ export default function PerfilPage() {
 
       const dadosSalvos = window.localStorage.getItem(`${STORAGE_PREFIX}:${user.id}`);
       const perfilLocal = dadosSalvos ? JSON.parse(dadosSalvos) : null;
+      const { data: usuarioBanco } = await supabase
+        .from("usuario")
+        .select("nome_usu")
+        .eq("uuid_usu", user.id)
+        .maybeSingle();
 
       setDadosConta({
-        nome: perfilLocal?.nome || user.user_metadata?.full_name || user.email?.split("@")[0] || "Seu perfil",
+        nome:
+          usuarioBanco?.nome_usu ||
+          user.user_metadata?.full_name ||
+          perfilLocal?.nome ||
+          user.email?.split("@")[0] ||
+          "Seu perfil",
         email: perfilLocal?.email || user.email || "",
         telefone: perfilLocal?.telefone || "",
       });
@@ -64,21 +75,85 @@ export default function PerfilPage() {
     carregarDados();
   }, [router]);
 
+  const formatarTelefone = (valor) => {
+    const apenasNumeros = valor.replace(/\D/g, "");
+    
+    if (apenasNumeros.length === 0) return "";
+    if (apenasNumeros.length <= 2) return `(${apenasNumeros}`;
+    if (apenasNumeros.length <= 6) return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2)}`;
+    if (apenasNumeros.length <= 10) return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2, 6)}-${apenasNumeros.slice(6)}`;
+    
+    return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2, 7)}-${apenasNumeros.slice(7, 11)}`;
+  };
+
   const handleChange = (field) => (event) => {
-    setDadosConta((current) => ({ ...current, [field]: event.target.value }));
+    let valor = event.target.value;
+    
+    if (field === "telefone") {
+      valor = formatarTelefone(valor);
+      setErroTelefone("");
+    }
+    
+    setDadosConta((current) => ({ ...current, [field]: valor }));
+  };
+
+  const validateTelefone = (telefone) => {
+    if (!telefone.trim()) return { valid: true };
+    const telefoneLimpo = telefone.replace(/\D/g, "");
+    if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11) {
+      return { valid: false, message: "Telefone deve ter 10 ou 11 dígitos." };
+    }
+    return { valid: true };
   };
 
   const handleSalvar = async (event) => {
     event.preventDefault();
 
+    const validacaoTelefone = validateTelefone(dadosConta.telefone);
+    if (!validacaoTelefone.valid) {
+      setErroTelefone(validacaoTelefone.message);
+      return;
+    }
+
     setSalvando(true);
 
+    const nomeLimpo = dadosConta.nome.trim();
+    const telefoneLimpo = dadosConta.telefone.trim();
+
     const payload = {
-      nome: dadosConta.nome.trim(),
+      nome: nomeLimpo,
       email: dadosConta.email.trim(),
-      telefone: dadosConta.telefone.trim(),
+      telefone: telefoneLimpo,
       ultimaAtualizacao: new Date().toISOString(),
     };
+
+    const [authResult, bancoResult] = await Promise.all([
+      supabase.auth.updateUser({
+        data: {
+          full_name: nomeLimpo,
+        },
+      }),
+      supabase
+        .from("usuario")
+        .upsert(
+          {
+            uuid_usu: user?.id,
+            nome_usu: nomeLimpo,
+            email_usu: payload.email,
+          },
+          { onConflict: "uuid_usu" }
+        ),
+    ]);
+
+    if (authResult.error || bancoResult.error) {
+      console.error("Erro ao salvar perfil:", {
+        authError: authResult.error,
+        bancoError: bancoResult.error,
+      });
+      toast.error("Não foi possível salvar o nome no sistema.");
+      setSalvando(false);
+      return;
+    }
 
     if (storageKey) {
       window.localStorage.setItem(storageKey, JSON.stringify(payload));
@@ -282,6 +357,9 @@ export default function PerfilPage() {
                         className="w-full rounded-2xl border border-[#ded7c7] bg-[#fbfaf6] px-4 py-3 outline-none focus:border-[#A8DCAB] focus:ring-4 focus:ring-[#A8DCAB]/20 transition"
                         placeholder="(11) 99999-9999"
                       />
+                      {erroTelefone && (
+                        <p className="mt-1 text-xs text-red-500 font-bold">{erroTelefone}</p>
+                      )}
                     </label>
 
                     <button

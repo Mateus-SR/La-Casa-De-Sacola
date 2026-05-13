@@ -8,7 +8,7 @@ import {
   UpdateIcon
 } from "@radix-ui/react-icons";
 import { useCart } from "../../context/CartContext";
-import toast,{ Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import useNavbarAuth from "../../hooks/loginAuthNavbar"; 
 import ToastErroAuth, { opcoesErroAuth } from "./loginToastNavbar";
 
@@ -60,7 +60,6 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-[#f4f7f5] shadow-sm border-b border-[#e4f4ed]">
       {/* Top bar */}
-      {/* <Toaster position="top-right" /> */}
       <div className="bg-[#292622] text-white text-xs py-1.5 text-center font-medium tracking-wide">
          Frete grátis para pedidos acima de R$500 &nbsp;|&nbsp; La Casa de Sacola
       </div>
@@ -207,6 +206,10 @@ export default function Navbar() {
                       <Link href="/producao" className="block px-4 py-2 text-sm text-[#8f0000] hover:text-red-700 transition-colors" onClick={() => setDropdownOpen(false)}>
                         Sacolas em Produção
                       </Link>
+
+                      <Link href="/relatorios" className="block px-4 py-2 text-sm text-[#8f0000] hover:text-red-700 transition-colors" onClick={() => setDropdownOpen(false)}>
+                        Relatórios
+                      </Link>
                       </>
                     )}
                     <hr className="my-1 border-[#e4f4ed]" />
@@ -316,6 +319,10 @@ export default function Navbar() {
 
                       <Link href="/producao" className="text-sm font-bold text-[#8f0000] py-2" onClick={() => setMenuOpen(false)}>
                         Sacolas em Produção
+                      </Link>
+
+                      <Link href="/relatorios" className="text-sm font-bold text-[#8f0000] py-2" onClick={() => setMenuOpen(false)}>
+                        Relatórios
                       </Link>
                       </>
                     )}

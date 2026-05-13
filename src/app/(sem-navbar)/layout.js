@@ -1,4 +1,6 @@
 import '@/app/css/globals.css';
+import AppToaster from "@/components/layout/AppToaster";
+import Script from 'next/script';
 
 export const metadata = {
   title: 'La Casa de Sacola — Sacolas Personalizadas',
@@ -17,7 +19,13 @@ export default function RootLayout({ children }) {
         <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" />
       </head>
       <body style={{ fontFamily: "'Manrope', sans-serif" }} className='custom-scrollbar'>
+        <AppToaster />
         {children}
+        <Script
+          src="https://cdn.userway.org/widget.js"
+          data-account="2F8cKg0ZVn"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

@@ -8,7 +8,6 @@ import AuthField from "@/components/auth/AuthField";
 import AuthPasswordField from "@/components/auth/AuthPasswordField";
 import AuthTextLink from "@/components/auth/AuthTextLink";
 import styles from "@/components/auth/auth.module.css";
-import { Toaster } from "react-hot-toast";
 import useLoginHook from "@/hooks/loginHook.js";
 import { useRouter } from "next/navigation";
 
@@ -18,7 +17,6 @@ export default function Login() {
 
   return (
     <>
-      <Toaster position="top-right" />
       <meta charSet="UTF-8" />
       <title>Login</title>
 

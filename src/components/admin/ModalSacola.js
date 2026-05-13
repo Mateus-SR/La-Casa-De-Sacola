@@ -2,6 +2,7 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import CoresMaterialPreview from "@/components/admin/CoresMaterialPreview";
 import {
   ExclamationTriangleIcon,
@@ -266,13 +267,47 @@ export default function ModalSacola({
 
             {/* Botão ocultar — só aparece no modo edição e quando não está oculto */}
             {sacolaEditandoId && sacola.status_sac !== 'Oculto' && (
-              <button
-                type="button"
-                onClick={onOcultar}
-                className="flex items-center justify-center gap-2 text-red-500 font-bold hover:underline"
-              >
-                <TrashIcon className="size-5" /> Quero excluir e ocultar essa sacola
-              </button>
+              <AlertDialog.Root>
+                <AlertDialog.Trigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-2 text-red-500 font-bold hover:underline"
+                  >
+                    <TrashIcon className="size-5" /> Quero excluir essa sacola
+                  </button>
+                </AlertDialog.Trigger>
+
+                <AlertDialog.Portal>
+                  <AlertDialog.Overlay className="bg-black/45 fixed inset-0 z-[120] backdrop-blur-sm" />
+                  <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-7 rounded-2xl shadow-2xl w-[min(92vw,30rem)] z-[130] outline-none border border-[#e4f4ed]">
+                    <AlertDialog.Title className="text-xl font-extrabold text-[#264f41] leading-tight">
+                      Tem certeza absoluta?
+                    </AlertDialog.Title>
+
+                    <AlertDialog.Description className="text-sm text-gray-600 mt-2 leading-relaxed">
+                      Esta ação vai excluir e ocultar a sacola da listagem ativa.
+                    </AlertDialog.Description>
+
+                    <div className="flex gap-3 justify-end mt-6">
+                      <AlertDialog.Cancel asChild>
+                        <button className="px-4 py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition outline-none">
+                          Cancelar
+                        </button>
+                      </AlertDialog.Cancel>
+
+                      <AlertDialog.Action asChild>
+                        <button
+                          type="button"
+                          onClick={onOcultar}
+                          className="px-4 py-3 rounded-xl font-bold text-white bg-[#d94f4f] hover:bg-[#c74242] transition outline-none shadow-sm"
+                        >
+                          Sim, excluir
+                        </button>
+                      </AlertDialog.Action>
+                    </div>
+                  </AlertDialog.Content>
+                </AlertDialog.Portal>
+              </AlertDialog.Root>
             )}
 
           </form>

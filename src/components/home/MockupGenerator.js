@@ -238,8 +238,10 @@ export default function MockupGenerator() {
   function handleDownload() {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const nomeSacola = sacolaSelecionada.nome.replace(/\s+/g, '-').toLowerCase();
+    const nomeArquivo = `mockup-${nomeSacola}-lcs.png`;
     const link = document.createElement("a");
-    link.download = "mockup-lacasa.png";
+    link.download = nomeArquivo;
     link.href = canvas.toDataURL("image/png");
     link.click();
   }

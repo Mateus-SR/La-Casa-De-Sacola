@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation"; 
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import AuthBackground from "@/components/auth/AuthBackground";
 import AuthButton from "@/components/auth/AuthButton";
@@ -140,7 +140,6 @@ export default function Cadastro() {
 
   return (
     <>
-      <Toaster position="top-right" />
       <title>Cadastro | La Casa De Sacola</title>
       
       <link

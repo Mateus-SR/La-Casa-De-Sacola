@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
 import AuthBackground from "@/components/auth/AuthBackground";
 import AuthButton from "@/components/auth/AuthButton";
@@ -59,7 +58,6 @@ export default function NovaSenha() {
 
   return (
     <>
-      <Toaster position="top-right" />
       <AuthBackground>
         <AuthCard>
           <h1
