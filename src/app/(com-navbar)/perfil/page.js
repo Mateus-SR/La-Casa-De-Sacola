@@ -244,12 +244,9 @@ export default function PerfilPage() {
                         className={`w-full rounded-2xl border bg-[#fbfaf6] px-4 py-3 outline-none transition ${erroTelefone ? "border-[#d94f4f] focus:border-[#d94f4f] focus:ring-4 focus:ring-[#d94f4f]/15" : "border-[#ded7c7] focus:border-[#A8DCAB] focus:ring-4 focus:ring-[#A8DCAB]/20"}`}
                         placeholder="(11) 99999-9999"
                       />
-<<<<<<< HEAD
                       {erroTelefone && (
-                        <p className="text-sm text-[#d94f4f] font-semibold mt-2">{erroTelefone}</p>
+                        <p className="mt-1 text-xs text-red-500 font-bold">{erroTelefone}</p>
                       )}
-=======
->>>>>>> parent of 7986b6e (arrumando os conflitos)
                     </label>
 
                     <button
