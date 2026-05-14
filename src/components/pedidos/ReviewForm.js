@@ -1,13 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { toast } from "react-hot-toast";
 
-export default function ReviewForm({ pedidoId, produtoId, onReviewSuccess }) {
+export default function ReviewForm({ pedidoId, produtoId, reviewToEdit, onReviewSuccess }) {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [enviando, setEnviando] = useState(false);
+
+  // Se estivermos editando, preenchemos os campos com os dados existentes
+  useEffect(() => {
+    if (reviewToEdit) {
+      setRating(reviewToEdit.nota_ava);
+      setComment(reviewToEdit.comentario_ava);
+    }
+  }, [reviewToEdit]);
 
   const send = async () => {
     if (enviando) return;
@@ -17,7 +25,7 @@ export default function ReviewForm({ pedidoId, produtoId, onReviewSuccess }) {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast.error("Você precisa estar logado para avaliar.");
+        toast.error("Você precisa estar logado para realizar esta ação.");
         setEnviando(false);
         return;
       }
@@ -45,25 +53,46 @@ export default function ReviewForm({ pedidoId, produtoId, onReviewSuccess }) {
         }
       }
 
-      const { error } = await supabase.from("avaliacao").insert([{
-        usu_uuid: user.id, 
-        id_sac: produtoId, 
-        id_ped: pedidoId || null, 
-        nota_ava: rating, 
-        comentario_ava: comment, 
-        nome_usu: user.email
-      }]);
+      if (reviewToEdit) {
+        // Lógica de Atualização (Edição)
+        const { error } = await supabase
+          .from("avaliacao")
+          .update({
+            nota_ava: rating,
+            comentario_ava: comment,
+          })
+          .eq("id_ava", reviewToEdit.id_ava)
+          .eq("usu_uuid", user.id); // Garantia extra de segurança
 
-      if (!error) { 
-        toast.success("Avaliação enviada com sucesso!"); 
-        if (onReviewSuccess) onReviewSuccess(); 
+        if (!error) {
+          toast.success("Avaliação atualizada com sucesso!");
+          if (onReviewSuccess) onReviewSuccess();
+        } else {
+          console.error("Erro ao atualizar avaliação:", error);
+          toast.error("Erro ao atualizar avaliação.");
+        }
       } else {
-        console.error("Erro ao inserir avaliação:", error);
-        toast.error("Erro ao enviar avaliação.");
+        // Lógica de Inserção (Nova Avaliação)
+        const { error } = await supabase.from("avaliacao").insert([{
+          usu_uuid: user.id, 
+          id_sac: produtoId, 
+          id_ped: pedidoId || null, 
+          nota_ava: rating, 
+          comentario_ava: comment, 
+          nome_usu: user.email
+        }]);
+
+        if (!error) { 
+          toast.success("Avaliação enviada com sucesso!"); 
+          if (onReviewSuccess) onReviewSuccess(); 
+        } else {
+          console.error("Erro ao inserir avaliação:", error);
+          toast.error("Erro ao enviar avaliação.");
+        }
       }
     } catch (err) {
       console.error("Erro inesperado:", err);
-      toast.error("Ocorreu um erro ao processar sua avaliação.");
+      toast.error("Ocorreu um erro ao processar sua solicitação.");
     } finally {
       setEnviando(false);
     }
@@ -95,7 +124,7 @@ export default function ReviewForm({ pedidoId, produtoId, onReviewSuccess }) {
         disabled={enviando}
         className="w-full bg-[#264f41] hover:bg-[#1a3a2e] text-white py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-[#264f41]/20 disabled:opacity-50"
       >
-        {enviando ? "Enviando..." : "Enviar Avaliação"}
+        {enviando ? "Processando..." : reviewToEdit ? "Salvar Alterações" : "Enviar Avaliação"}
       </button>
     </div>
   );
