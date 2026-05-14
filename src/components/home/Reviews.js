@@ -114,6 +114,7 @@ function StarRating({ rating }) {
 
 export default function Reviews() {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const [visibleCount, setVisibleCount] = useState(3);
 
   const avgRating = (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
@@ -209,6 +210,8 @@ export default function Reviews() {
                 </div>
               )}
 =======
+=======
+>>>>>>> parent of a8a5e0f (avaliação no site esta funcionando)
   const [reviews, setReviews] = useState([]);
   useEffect(() => {
     const fetch = async () => {
@@ -231,6 +234,9 @@ export default function Reviews() {
               </div>
               <p className="text-sm text-gray-600 italic">"{r.comentario_ava}"</p>
               <p className="text-xs text-[#3ca779] mt-2 font-bold">{r.sacola?.nome_sac}</p>
+<<<<<<< HEAD
+>>>>>>> parent of a8a5e0f (avaliação no site esta funcionando)
+=======
 >>>>>>> parent of a8a5e0f (avaliação no site esta funcionando)
             </div>
           ))}
