@@ -1,92 +1,6 @@
 "use client";
-import { useState } from "react";
-
-const reviews = [
-  {
-    id: 1,
-    name: "Ana Paula Ferreira",
-    business: "Boutique Flor de Liz",
-    rating: 5,
-    date: "Março 2026",
-    product: "Sacola Kraft Premium",
-    comment:
-      "Ficaram simplesmente perfeitas! A qualidade da impressão superou minhas expectativas. Meus clientes adoraram as sacolas e vários perguntaram onde mandei fazer. Com certeza vou repetir o pedido!",
-    avatar: "A",
-    avatarColor: "bg-[#3ca779]",
-    hasPhoto: true,
-    photoColor: "from-[#f0faf5] to-[#e0f5ea]",
-  },
-  {
-    id: 2,
-    name: "Carlos Eduardo",
-    business: "Confeitaria Doce Mel",
-    rating: 5,
-    date: "Fevereiro 2026",
-    product: "Sacola com Cordão",
-    comment:
-      "Atendimento excelente desde o primeiro contato. A equipe me ajudou a ajustar a arte e o resultado ficou incrível. As sacolas com cordão deram um toque muito mais sofisticado para minha confeitaria.",
-    avatar: "C",
-    avatarColor: "bg-[#264f41]",
-    hasPhoto: true,
-    photoColor: "from-[#f5f0fa] to-[#ede0f5]",
-  },
-  {
-    id: 3,
-    name: "Mariana Costa",
-    business: "Loja Veste Bem",
-    rating: 5,
-    date: "Janeiro 2026",
-    product: "Sacola de Papel",
-    comment:
-      "Terceiro pedido e continuo muito satisfeita. Prazo sempre cumprido, qualidade constante e preço justo. A empresa familiar faz toda a diferença no atendimento personalizado.",
-    avatar: "M",
-    avatarColor: "bg-[#f59e0b]",
-    hasPhoto: false,
-    photoColor: "",
-  },
-  {
-    id: 4,
-    name: "Roberto Alves",
-    business: "Farmácia Saúde Total",
-    rating: 4,
-    date: "Dezembro 2025",
-    product: "Sacola Plástica",
-    comment:
-      "Ótimo custo-benefício para sacolas plásticas em grande quantidade. A impressão ficou bem nítida e as sacolas são resistentes. Recomendo para quem precisa de volume com qualidade.",
-    avatar: "R",
-    avatarColor: "bg-[#3b82f6]",
-    hasPhoto: false,
-    photoColor: "",
-  },
-  {
-    id: 5,
-    name: "Fernanda Lima",
-    business: "Ateliê Criativo",
-    rating: 5,
-    date: "Novembro 2025",
-    product: "Sacola Kraft",
-    comment:
-      "Pedi para minha linha de produtos artesanais e ficou lindo! A sacola kraft combina perfeitamente com a identidade da minha marca. O acabamento é impecável.",
-    avatar: "F",
-    avatarColor: "bg-[#ec4899]",
-    hasPhoto: true,
-    photoColor: "from-[#fff8f0] to-[#fef3c7]",
-  },
-  {
-    id: 6,
-    name: "Paulo Henrique",
-    business: "Pet Shop Amigo Fiel",
-    rating: 5,
-    date: "Outubro 2025",
-    product: "Sacola de Papel",
-    comment:
-      "Encomendei sacolas para o Natal do meu pet shop e ficaram maravilhosas! As cores saíram exatamente como na arte. Entrega antes do prazo. Muito obrigado!",
-    avatar: "P",
-    avatarColor: "bg-[#8b5cf6]",
-    hasPhoto: false,
-    photoColor: "",
-  },
-];
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabaseClient";
 
 function StarRating({ rating }) {
   return (
@@ -113,9 +27,49 @@ function StarRating({ rating }) {
 }
 
 export default function Reviews() {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(3);
 
-  const avgRating = (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("avaliacao")
+          .select("*, sacola(nome_sac)")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Erro ao buscar avaliações:", error);
+        } else {
+          setReviews(data || []);
+        }
+      } catch (err) {
+        console.error("Erro inesperado:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  const avgRating = reviews.length > 0 
+    ? (reviews.reduce((sum, r) => sum + r.nota_ava, 0) / reviews.length).toFixed(1)
+    : "5.0";
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-gray-500 italic">Carregando depoimentos...</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Se não houver avaliações no banco, você pode optar por mostrar as fakes ou não mostrar a seção.
+  // Aqui vamos mostrar a seção apenas se houver dados reais.
+  if (reviews.length === 0) return null;
 
   return (
     <section id="avaliacoes" className="py-20 bg-white">
@@ -132,22 +86,23 @@ export default function Reviews() {
             O que nossos clientes dizem
           </h2>
           <p className="text-[#6b9e8a] text-lg max-w-2xl mx-auto">
-            Mais de 200 clientes satisfeitos. Veja o que eles falam sobre nossas sacolas personalizadas.
+            Veja o que nossos clientes estão falando sobre a qualidade das nossas sacolas personalizadas.
           </p>
         </div>
 
+        {/* Resumo de Notas */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-12 p-6 bg-[#f8fdfb] rounded-3xl border border-[#e4f4ed] max-w-lg mx-auto">
           <div className="text-center">
             <div className="text-6xl font-extrabold text-[#264f41]" style={{ fontFamily: "'Quicksand', sans-serif" }}>
               {avgRating}
             </div>
-            <StarRating rating={5} />
+            <StarRating rating={Math.round(parseFloat(avgRating))} />
             <p className="text-[#6b9e8a] text-sm mt-1">de 5 estrelas</p>
           </div>
           <div className="w-px h-16 bg-[#e4f4ed] hidden sm:block" />
           <div className="space-y-1.5">
             {[5, 4, 3, 2, 1].map((star) => {
-              const count = reviews.filter((r) => r.rating === star).length;
+              const count = reviews.filter((r) => r.nota_ava === star).length;
               const pct = Math.round((count / reviews.length) * 100);
               return (
                 <div key={star} className="flex items-center gap-2">
@@ -168,45 +123,36 @@ export default function Reviews() {
           </div>
         </div>
 
+        {/* Grid de Avaliações */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.slice(0, visibleCount).map((review) => (
             <div
-              key={review.id}
+              key={review.id_ava}
               className="bg-white rounded-3xl border border-[#e4f4ed] p-6 hover:shadow-lg hover:border-[#c8e3d5] transition-all group"
             >
-              {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-2xl ${review.avatarColor} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
-                    {review.avatar}
+                  <div className={`w-10 h-10 rounded-2xl bg-[#3ca779] flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+                    {review.nome_usu?.charAt(0).toUpperCase() || "C"}
                   </div>
                   <div>
-                    <p className="font-bold text-[#264f41] text-sm">{review.name}</p>
-                    <p className="text-[#6b9e8a] text-xs">{review.business}</p>
+                    <p className="font-bold text-[#264f41] text-sm">{review.nome_usu || "Cliente"}</p>
+                    <p className="text-[#6b9e8a] text-xs">Avaliação Verificada</p>
                   </div>
                 </div>
-                <span className="text-[#9ab8ae] text-xs">{review.date}</span>
-              </div>
-
-              <div className="flex items-center gap-2 mb-3">
-                <StarRating rating={review.rating} />
-                <span className="text-xs text-[#6b9e8a] bg-[#f0faf5] px-2 py-0.5 rounded-full">
-                  {review.product}
+                <span className="text-[#9ab8ae] text-xs">
+                  {new Date(review.created_at).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                 </span>
               </div>
 
-              <p className="text-[#4a7a66] text-sm leading-relaxed mb-4">"{review.comment}"</p>
+              <div className="flex items-center gap-2 mb-3">
+                <StarRating rating={review.nota_ava} />
+                <span className="text-xs text-[#6b9e8a] bg-[#f0faf5] px-2 py-0.5 rounded-full">
+                  {review.sacola?.nome_sac || "Produto LCS"}
+                </span>
+              </div>
 
-              {review.hasPhoto && (
-                <div className={`rounded-2xl bg-gradient-to-br ${review.photoColor} h-24 flex items-center justify-center border border-[#e4f4ed]`}>
-                  <div className="flex items-center gap-2 text-[#6b9e8a]">
-                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-xs font-medium">Foto do produto</span>
-                  </div>
-                </div>
-              )}
+              <p className="text-[#4a7a66] text-sm leading-relaxed mb-4">"{review.comentario_ava}"</p>
             </div>
           ))}
         </div>
