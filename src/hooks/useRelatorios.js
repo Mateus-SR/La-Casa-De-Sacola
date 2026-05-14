@@ -20,7 +20,7 @@ export function useRelatorios() {
     const [
       { data: itens, error: errItens },
       { data: pedidos, error: errPedidos },
-      { data: clientes, error: errClientes },
+      { count: contagemUsuarios, error: errClientes },
     ] = await Promise.all([
       supabase
         .from("itens_pedido")
@@ -107,7 +107,7 @@ export function useRelatorios() {
       pedidos: pedidos?.length || 0,
       receita: totalReceita,
       sacolas: totalSacolas,
-      clientes: clientes?.count || 0,
+      clientes: contagemUsuarios || 0,
     });
     setLoading(false);
   };
