@@ -98,6 +98,11 @@ export default function PerfilPage() {
 
   return (
     <div className="min-h-screen bg-[#eef5ee] flex flex-col text-[#264f41] relative overflow-hidden">
+<<<<<<< HEAD
+=======
+      <Toaster position="top-right" />
+
+>>>>>>> parent of a8a5e0f (avaliação no site esta funcionando)
       <main className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-[linear-gradient(140deg,#f6fbf6_0%,#e8f6ea_20%,#d8eddc_42%,#c7e7cd_66%,#A8DCAB_100%)]" />

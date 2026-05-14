@@ -161,7 +161,6 @@ const finalizarCompra = async () => {
     }
 
     // 3. Criar o registro na tabela 'pedido'
-    // Utilizando as colunas da sua tabela: usu_uuid e status_ped
     const { data: pedido, error: pedidoError } = await supabase
       .from("pedido")
       .insert({
@@ -180,7 +179,6 @@ const finalizarCompra = async () => {
     }
 
     // 4. Criar os registros na tabela 'itens_pedido'
-    // Vinculando cada item do carrinho ao id_ped gerado
     const itens = cartItems.map((item) => ({
       ped_id: pedido.id_ped,        
       sac_id: item.id_sac,         
@@ -196,12 +194,28 @@ const finalizarCompra = async () => {
       throw new Error(`Erro nos itens: ${itensError.message}`);
     }
 
-    // 5. Sucesso, Limpeza e Redirecionamento
-    clearCart(); // Limpa o estado e o localStorage
-    toast.success("Pedido finalizado com sucesso!");
-    
-    // Encaminha para a página de acompanhamento de pedidos
-    router.push("/pedidos"); 
+    // 5. NOVA PARTE: Chamar a API de pagamento após salvar no banco
+    const paymentResponse = await fetch('/api/pagamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pedidoId: pedido.id_ped,
+        itens: cartItems,
+        total: total,
+        frete: valorFrete
+      })
+    });
+
+    const paymentData = await paymentResponse.json();
+
+    if (paymentData.init_point) {
+      clearCart(); // Limpa o estado e o localStorage
+      toast.success("Redirecionando para o pagamento...");
+      // Redireciona o usuário para a tela de pagamento segura do Mercado Pago
+      window.location.href = paymentData.init_point; 
+    } else {
+      throw new Error("Não foi possível gerar o link de pagamento.");
+    }
 
   } catch (error) {
     console.error("Erro no checkout:", error);
@@ -451,4 +465,7 @@ const finalizarCompra = async () => {
       </main>
     </div>
   );
+
+  
 }
+
