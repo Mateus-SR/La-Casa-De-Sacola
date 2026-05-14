@@ -1,0 +1,23 @@
+name: Sync Fork Automático
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # Tenta sincronizar a cada 30 minutos
+  workflow_dispatch:      # Permite que você clique em um botão para sincronizar agora
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v3
+        with:
+          ref: main-oficial # Garante que está na sua branch correta
+
+      - name: Sync upstream
+        uses: repo-sync/github-sync@v2
+        with:
+          source_repo: https://github.com/Mateus-SR/La-Casa-De-Sacola
+          source_branch: "main-oficial"
+          destination_branch: "main-oficial"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
