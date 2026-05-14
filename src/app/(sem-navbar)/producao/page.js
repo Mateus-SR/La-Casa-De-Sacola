@@ -74,9 +74,18 @@ export default function Producao() {
     };
     
     // Atualiza o estado local sem recarregar a página:
-    const handleStatusAtualizado = (idPedido, novoStatus) => {
+    const handleStatusAtualizado = (idPedido, novoStatus, nomeAlterador) => {
       setPedidos((prev) =>
-        prev.map((p) => p.id_ped === idPedido ? { ...p, status_ped: novoStatus } : p)
+        prev.map((p) =>
+          p.id_ped === idPedido
+            ? { 
+                ...p, 
+                status_ped: novoStatus,
+                alterado_por: nomeAlterador,
+                ultima_alteracao: new Date().toISOString()
+              }
+            : p
+        )
       );
     };
 
@@ -230,39 +239,84 @@ export default function Producao() {
               </Dialog.Title>
 
               {/* Informações do Cliente */}
-              <div className="bg-[#f9fdfa] border border-[#e4f4ed] rounded-xl p-4">
-                <p className="text-xs font-bold text-[#3ca779] uppercase tracking-wider mb-2">Dados do Cliente</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Nome</p>
-                    <p className="font-semibold text-[#264f41]">{pedidoSelecionado?.usuario?.nome_usu || 'Não informado'}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Email</p>
-                    <p className="font-semibold text-[#264f41]">{pedidoSelecionado?.usuario?.email_usu || 'Não informado'}</p>
-                  </div>
-                </div>
-              </div>
+<div className="bg-[#f9fdfa] border border-[#e4f4ed] rounded-xl p-4">
+  <p className="text-xs font-bold text-[#3ca779] uppercase tracking-wider mb-2">Dados do Cliente</p>
+  <div className="grid grid-cols-2 gap-4">
+    <div>
+      <p className="text-xs text-gray-500">Nome</p>
+      <p className="font-semibold text-[#264f41]">{pedidoSelecionado?.usuario?.nome_usu || 'Não informado'}</p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Email</p>
+      <p className="font-semibold text-[#264f41]">{pedidoSelecionado?.usuario?.email_usu || 'Não informado'}</p>
+    </div>
+  </div>
+</div>
+
+{/* Histórico de Alteração — NOVO */}
+<div className="bg-[#f9fdfa] border border-[#e4f4ed] rounded-xl p-4">
+  <p className="text-xs font-bold text-[#3ca779] uppercase tracking-wider mb-2">Histórico</p>
+  <div className="grid grid-cols-2 gap-4">
+    <div>
+      <p className="text-xs text-gray-500">Última alteração por</p>
+      <p className="font-semibold text-[#264f41]">
+        {pedidoSelecionado?.alterado_por || (
+          <span className="text-gray-400 italic font-normal">Nenhuma alteração ainda</span>
+        )}
+      </p>
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">Data da alteração</p>
+      <p className="font-semibold text-[#264f41]">
+        {pedidoSelecionado?.ultima_alteracao
+          ? new Date(pedidoSelecionado.ultima_alteracao).toLocaleString("pt-BR")
+          : <span className="text-gray-400 italic font-normal">—</span>
+        }
+      </p>
+    </div>
+  </div>
+</div>
 
               {/* Lista de Itens */}
-              <div className="flex flex-col gap-3 flex-1 overflow-y-auto mt-2">
-                <p className="text-xs font-bold text-[#3ca779] uppercase tracking-wider">Itens a Produzir:</p>
-                {pedidoSelecionado?.itens_pedido?.map((item) => (
-                  <div key={item.id_ten} className="bg-[#f4f7f5] border border-[#e4f4ed] rounded-xl p-4 flex justify-between items-center">
-                    <div>
-                      {/* Tenta pegar o nome da sacola do join, se não achar, usa um texto genérico */}
-                      <p className="font-bold text-[#264f41]">
-                        {item.sacola?.nome_sac || 'Sacola Personalizada'} - Cor: {item.cores?.nome_cor || item.cor_id}
-                      </p>
-                      <p className="text-sm text-gray-600">{item.quantidade}x unidades</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-400 font-bold uppercase">Subtotal</p>
-                      <p className="font-black text-[#3ca779]">R$ {(Number(item.preco) * item.quantidade).toFixed(2)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+<div className="flex flex-col gap-3 flex-1 overflow-y-auto mt-2">
+  <p className="text-xs font-bold text-[#3ca779] uppercase tracking-wider">Itens a Produzir:</p>
+  {pedidoSelecionado?.itens_pedido?.map((item) => (
+    <div key={item.id_ten} className="bg-[#f4f7f5] border border-[#e4f4ed] rounded-xl p-4 flex justify-between items-start gap-4">
+      <div className="flex-1">
+        <p className="font-bold text-[#264f41]">
+          {item.sacola?.nome_sac || 'Sacola Personalizada'} - Cor: {item.cores?.nome_cor || item.cor_id}
+        </p>
+        <p className="text-sm text-gray-600">{item.quantidade}x unidades</p>
+
+        {/* Logo do cliente */}
+        {item.logo_url ? (
+          <div className="mt-3">
+            <p className="text-xs font-bold text-[#6b9e8a] uppercase mb-1">Logo enviado pelo cliente:</p>
+            <img
+              src={item.logo_url}
+              alt="Logo do cliente"
+              onClick={() => setImagemAberta(item.logo_url)}
+              className="w-24 h-24 object-contain rounded-xl border border-[#e4f4ed] bg-white cursor-pointer hover:opacity-80 transition-opacity hover:shadow-md"
+              title="Clique para ampliar"
+            />
+            <p className="text-xs text-[#6b9e8a] mt-1">Clique para ampliar</p>
+          </div>
+        ) : (
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs text-[#a0bcb2] italic">Nenhum logo enviado</span>
+          </div>
+        )}
+      </div>
+
+      <div className="text-right shrink-0">
+        <p className="text-xs text-gray-400 font-bold uppercase">Subtotal</p>
+        <p className="font-black text-[#3ca779]">
+          R$ {(Number(item.preco) * item.quantidade).toFixed(2)}
+        </p>
+      </div>
+    </div>
+  ))}
+</div>
 
               {/* Rodapé: Resumo de Valores */}
               <div className="mt-2 pt-4 border-t border-gray-100 bg-[#f9fdfa] p-4 rounded-xl">
@@ -299,7 +353,7 @@ export default function Producao() {
             <img
               src={imagemAberta}
               alt="Imagem ampliada"
-              className="max-h-full max-w-full rounded-xl object-contain shadow-2xl"
+              className="max-h-full max-w-full rounded-xl object-contain shadow-2xl z-[999999]"
             />
           </div>
         )}

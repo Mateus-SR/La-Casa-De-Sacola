@@ -18,25 +18,12 @@ import {
 // Função utilitária: faz o upload para o Cloudinary usando assinatura segura
 // ---------------------------------------------------------------------------
 async function uploadParaCloudinary(arquivo) {
-  // 1. Pede a assinatura para a nossa API Route
-  const resAssinatura = await fetch("/api/upload-signature", {
-    method: "POST",
-  });
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = "publico"; // nome do preset que você criou
 
-  if (!resAssinatura.ok) {
-    throw new Error("Não foi possível gerar a assinatura de upload.");
-  }
-
-  const { timestamp, signature, apiKey, cloudName } =
-    await resAssinatura.json();
-
-  // 2. Monta o FormData e envia direto para o Cloudinary
   const formData = new FormData();
   formData.append("file", arquivo);
-  formData.append("timestamp", timestamp);
-  formData.append("signature", signature);
-  formData.append("api_key", apiKey);
-  formData.append("folder", "la-casa-sacola/logos");
+  formData.append("upload_preset", uploadPreset);
 
   const resUpload = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -44,11 +31,13 @@ async function uploadParaCloudinary(arquivo) {
   );
 
   if (!resUpload.ok) {
-    throw new Error("Falha ao enviar o arquivo para o Cloudinary.");
+    const erroDetalhado = await resUpload.json();
+    console.error("Erro Cloudinary:", erroDetalhado);
+    throw new Error(erroDetalhado?.error?.message || "Falha ao enviar o arquivo.");
   }
 
   const dados = await resUpload.json();
-  return dados.secure_url; // URL pública e permanente da imagem
+  return dados.secure_url;
 }
 
 // ---------------------------------------------------------------------------

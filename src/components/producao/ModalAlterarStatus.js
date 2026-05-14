@@ -41,18 +41,34 @@ export default function ModalAlterarStatus({ pedido, open, onOpenChange, onStatu
       onOpenChange(false);
       return;
     }
-
+  
     setSalvando(true);
     try {
+      // Busca o usuário logado
+      const { data: { user } } = await supabase.auth.getUser();
+  
+      // Busca o nome do usuário
+      const { data: perfil } = await supabase
+        .from("usuario")
+        .select("nome_usu, email_usu")
+        .eq("uuid_usu", user.id)
+        .single();
+  
+      const nomeAlterador = perfil?.nome_usu || perfil?.email_usu || user.email;
+  
       const { error } = await supabase
         .from("pedido")
-        .update({ status_ped: statusSelecionado })
+        .update({ 
+          status_ped: statusSelecionado,
+          alterado_por: nomeAlterador,        // salva quem alterou
+          ultima_alteracao: new Date().toISOString() // atualiza timestamp
+        })
         .eq("id_ped", pedido.id_ped);
-
+  
       if (error) throw error;
-
+  
       toast.success("Status atualizado com sucesso!");
-      onStatusAtualizado(pedido.id_ped, statusSelecionado);
+      onStatusAtualizado(pedido.id_ped, statusSelecionado, nomeAlterador);
       onOpenChange(false);
     } catch (e) {
       console.error("Erro ao atualizar status:", e);
